@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap");
+
+.fleur-theme {
+  /* Porcelain + blush + rose gold — elite feminine beauty maison */
+  --fleur-cream: #fdf9f7;
+  --fleur-blush: #f8ede9;
+  --fleur-panel: #ffffff;
+  --fleur-line: rgb(183 110 121 / 0.22);
+  --fleur-plum: #43293c;
+  --fleur-soft: #74556a;
+  --fleur-muted: #a2879b;
+  --fleur-rose: #b76e79;
+  --fleur-rose-deep: #9d5364;
+  --fleur-gold: #c9a35f;
+
+  min-height: 100vh;
+  background-color: var(--fleur-cream);
+  color: var(--fleur-plum);
+}
+
+.fleur-theme a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.fleur-display {
+  font-family: "Playfair Display", var(--font-tajawal), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1;
+}
+
+[lang="ar"] .fleur-display {
+  font-family: var(--font-tajawal), "Playfair Display", sans-serif;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.fleur-italic {
+  font-family: "Playfair Display", var(--font-tajawal), Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+}
+
+[lang="ar"] .fleur-italic {
+  font-family: var(--font-tajawal), sans-serif;
+  font-style: normal;
+}
+
+.fleur-shell {
+  width: min(1080px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .fleur-shell {
+    width: min(1080px, calc(100% - 3rem));
+  }
+}
+
+.fleur-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--fleur-rose-deep);
+}
+
+.fleur-eyebrow::before {
+  content: "";
+  width: 2rem;
+  height: 1px;
+  background: var(--fleur-rose);
+  opacity: 0.6;
+}
+
+.fleur-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.95rem 2rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.25s,
+    color 0.25s,
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.2s;
+}
+
+.fleur-btn:active {
+  transform: scale(0.985);
+}
+
+.fleur-btn-primary,
+.fleur-theme a.fleur-btn-primary {
+  background: var(--fleur-rose);
+  color: #fff;
+  box-shadow: 0 10px 26px -12px rgb(157 83 100 / 0.55);
+}
+
+.fleur-btn-primary:hover,
+.fleur-theme a.fleur-btn-primary:hover {
+  background: var(--fleur-rose-deep);
+  color: #fff;
+}
+
+.fleur-btn-ghost {
+  border: 1px solid var(--fleur-line);
+  color: var(--fleur-plum);
+  background: transparent;
+}
+
+.fleur-btn-ghost:hover {
+  border-color: var(--fleur-rose);
+  color: var(--fleur-rose-deep);
+  background: rgb(183 110 121 / 0.06);
+}
+
+.fleur-card {
+  background: var(--fleur-panel);
+  border: 1px solid var(--fleur-line);
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 50px -36px rgb(67 41 60 / 0.28);
+}
+
+@keyframes fleur-fade {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fleur-veil {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fleur-in {
+  animation: fleur-fade 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.fleur-in-1 {
+  animation-delay: 120ms;
+}
+
+.fleur-in-2 {
+  animation-delay: 240ms;
+}
+
+.fleur-in-3 {
+  animation-delay: 380ms;
+}
+
+.fleur-veil {
+  animation: fleur-veil 1.4s ease both;
+}

@@ -1,0 +1,184 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+
+.kickoff-theme {
+  /* Stadium night + pitch green + floodlight gold — WC limited edition */
+  --ko-night: #07111f;
+  --ko-deep: #0c1a2e;
+  --ko-panel: #12233a;
+  --ko-pitch: #1db954;
+  --ko-pitch-deep: #149a44;
+  --ko-gold: #f0c14b;
+  --ko-gold-soft: #ffd977;
+  --ko-white: #f4f7fb;
+  --ko-soft: #b8c5d6;
+  --ko-muted: #7a8fa8;
+  --ko-line: rgb(240 193 75 / 0.22);
+
+  min-height: 100vh;
+  background: var(--ko-night);
+  color: var(--ko-white);
+}
+
+.kickoff-theme a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kickoff-display {
+  font-family: "Bebas Neue", var(--font-tajawal), Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+[lang="ar"] .kickoff-display {
+  font-family: var(--font-tajawal), "Bebas Neue", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.1;
+}
+
+.kickoff-shell {
+  width: min(1100px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .kickoff-shell {
+    width: min(1100px, calc(100% - 3rem));
+  }
+}
+
+.kickoff-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ko-gold);
+}
+
+.kickoff-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: background-color 0.2s, color 0.2s, transform 0.15s;
+}
+
+.kickoff-btn:active {
+  transform: scale(0.98);
+}
+
+.kickoff-btn-primary,
+.kickoff-theme a.kickoff-btn-primary {
+  background: var(--ko-gold);
+  color: var(--ko-night);
+}
+
+.kickoff-btn-primary:hover,
+.kickoff-theme a.kickoff-btn-primary:hover {
+  background: var(--ko-gold-soft);
+  color: var(--ko-night);
+}
+
+.kickoff-btn-pitch,
+.kickoff-theme a.kickoff-btn-pitch {
+  background: var(--ko-pitch);
+  color: #04140a;
+}
+
+.kickoff-btn-pitch:hover,
+.kickoff-theme a.kickoff-btn-pitch:hover {
+  background: var(--ko-pitch-deep);
+  color: #fff;
+}
+
+.kickoff-btn-ghost {
+  border: 1px solid var(--ko-line);
+  background: transparent;
+  color: var(--ko-white);
+  clip-path: none;
+}
+
+.kickoff-btn-ghost:hover {
+  border-color: var(--ko-gold);
+  color: var(--ko-gold);
+}
+
+.kickoff-pitch-bg {
+  background-image:
+    linear-gradient(90deg, transparent 49.5%, rgb(255 255 255 / 0.06) 49.5%, rgb(255 255 255 / 0.06) 50.5%, transparent 50.5%),
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+}
+
+@keyframes kickoff-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kickoff-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes kickoff-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.kickoff-in {
+  animation: kickoff-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.kickoff-in-1 {
+  animation-delay: 100ms;
+}
+
+.kickoff-in-2 {
+  animation-delay: 220ms;
+}
+
+.kickoff-in-3 {
+  animation-delay: 340ms;
+}
+
+.kickoff-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: kickoff-ticker 28s linear infinite;
+}
+
+[dir="rtl"] .kickoff-ticker-track {
+  animation-direction: reverse;
+}
+
+.kickoff-flood {
+  animation: kickoff-glow 4.5s ease-in-out infinite;
+}

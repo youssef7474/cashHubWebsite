@@ -1,0 +1,129 @@
+.studio-theme {
+  /* Cool stone + ink + living coral — salon landing reference palette */
+  --studio-bg: #f5f6f8;
+  --studio-bg-soft: #eef0f3;
+  --studio-surface: #ffffff;
+  --studio-ink: #14161a;
+  --studio-ink-soft: #3d424b;
+  --studio-muted: #7a808c;
+  --studio-line: #e4e7ec;
+  --studio-accent: #e35d4a;
+  --studio-accent-deep: #c94a39;
+  --studio-blush: #f8ebe8;
+  --studio-deep: #1c1f26;
+
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgb(227 93 74 / 0.08), transparent 55%),
+    radial-gradient(900px 500px at -10% 30%, rgb(28 31 38 / 0.04), transparent 50%),
+    var(--studio-bg);
+  color: var(--studio-ink);
+  /* Inherit Tajawal (ar) / Plus Jakarta (en) from root layout */
+}
+
+.studio-theme a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.studio-shell {
+  width: min(1120px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .studio-shell {
+    width: min(1120px, calc(100% - 3rem));
+  }
+}
+
+.studio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.studio-btn:active {
+  transform: scale(0.98);
+}
+
+.studio-btn-primary {
+  background: var(--studio-accent);
+  color: #fff;
+}
+
+.studio-btn-primary:hover {
+  background: var(--studio-accent-deep);
+}
+
+.studio-btn-ghost {
+  border: 1px solid var(--studio-line);
+  background: rgb(255 255 255 / 0.65);
+  color: var(--studio-ink);
+}
+
+.studio-btn-ghost:hover {
+  border-color: var(--studio-ink);
+  background: var(--studio-surface);
+}
+
+.studio-btn-deep {
+  background: var(--studio-deep);
+  color: #fff;
+}
+
+.studio-btn-deep:hover {
+  background: #000;
+}
+
+.studio-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--studio-accent);
+}
+
+.studio-title {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--studio-ink);
+}
+
+@keyframes studio-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.studio-rise {
+  animation: studio-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.studio-rise-1 {
+  animation-delay: 90ms;
+}
+
+.studio-rise-2 {
+  animation-delay: 180ms;
+}
+
+.studio-rise-3 {
+  animation-delay: 280ms;
+}
+
+.studio-rise-4 {
+  animation-delay: 380ms;
+}
