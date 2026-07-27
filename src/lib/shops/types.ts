@@ -100,6 +100,11 @@ export type ShopWebsiteData = {
   };
   categories: ShopServiceCategory[];
   timeSlots: ShopTimeSlot[];
+  /**
+   * Lowercase weekday keys the shop is open, e.g. "monday".
+   * Empty/undefined means no restriction (all days bookable).
+   */
+  workingDays?: string[];
   hours: ShopHoursDay[];
   contact: ShopContact;
   faqs: ShopFaq[];

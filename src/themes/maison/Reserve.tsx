@@ -12,6 +12,7 @@ import { useBookedSlots } from "@/components/reservation/useBookedSlots";
 import {
   getBarberUi,
   getBookingDayOptions,
+  getDefaultBookingDayOffset,
   type BookingDayOffset,
 } from "@/themes/barber/ui";
 
@@ -25,19 +26,26 @@ type MaisonReserveProps = {
 export function MaisonReserve({ shop }: MaisonReserveProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
-  const dayOptions = useMemo(() => getBookingDayOptions(locale), [locale]);
+  const dayOptions = useMemo(
+    () => getBookingDayOptions(locale, shop.workingDays),
+    [locale, shop.workingDays],
+  );
   const bookingDates = useMemo(
-    () => dayOptions.map((d) => d.dateISO),
+    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
     [dayOptions],
   );
   const [categoryId, setCategoryId] = useState(shop.categories[0]?.id ?? "");
-  const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(0);
+  const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(() =>
+    getDefaultBookingDayOffset(dayOptions),
+  );
   const [timeId, setTimeId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const activeCategory =
     shop.categories.find((c) => c.id === categoryId) ?? shop.categories[0];
-  const selectedDay = dayOptions.find((d) => d.offset === dayOffset);
+  const selectedDay = dayOptions.find(
+    (d) => d.offset === dayOffset && d.isOpen,
+  );
   const {
     bookedSlots,
     isLoading: slotsLoading,
@@ -148,13 +156,17 @@ export function MaisonReserve({ shop }: MaisonReserveProps) {
                       <button
                         key={day.offset}
                         type="button"
+                        disabled={!day.isOpen}
                         onClick={() => {
+                          if (!day.isOpen) return;
                           setDayOffset(day.offset);
                           setTimeId(null);
                         }}
                         className={cn(
                           "flex flex-col items-center gap-1 border px-2 py-3 transition-colors",
-                          active
+                          !day.isOpen
+                            ? "cursor-not-allowed border-[var(--maison-line)] bg-[var(--maison-panel)] text-[var(--maison-muted)] opacity-50"
+                            : active
                             ? "border-[var(--maison-champagne)] bg-[var(--maison-champagne)]/10 text-[var(--maison-champagne)]"
                             : "border-[var(--maison-line)] text-[var(--maison-soft)] hover:border-[var(--maison-champagne)]/50",
                         )}
@@ -163,7 +175,7 @@ export function MaisonReserve({ shop }: MaisonReserveProps) {
                           {day.label}
                         </span>
                         <span className="text-xs text-[var(--maison-muted)]">
-                          {day.dateLabel}
+                          {day.isOpen ? day.dateLabel : ui.dayClosed}
                         </span>
                       </button>
                     );
@@ -174,11 +186,13 @@ export function MaisonReserve({ shop }: MaisonReserveProps) {
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {shop.timeSlots.map((slot) => {
                     const active = activeTimeId === slot.id;
-                    const ended = hasTimeSlotEnded(slot.id, dayOffset);
+                    const ended =
+                      !selectedDay || hasTimeSlotEnded(slot.id, dayOffset);
                     const booked =
                       Boolean(selectedDay) && bookedSlots.has(slot.id);
                     const pending = Boolean(selectedDay) && slotsLoading;
-                    const disabled = ended || booked || pending;
+                    const disabled =
+                      !selectedDay || ended || booked || pending;
                     return (
                       <button
                         key={slot.id}

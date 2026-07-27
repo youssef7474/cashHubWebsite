@@ -12,6 +12,7 @@ import { useBookedSlots } from "@/components/reservation/useBookedSlots";
 import {
   getBarberUi,
   getBookingDayOptions,
+  getDefaultBookingDayOffset,
   type BookingDayOffset,
 } from "@/themes/barber/ui";
 import { getKickoffCopy } from "./Ticker";
@@ -27,19 +28,26 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const ko = getKickoffCopy(locale);
-  const dayOptions = useMemo(() => getBookingDayOptions(locale), [locale]);
+  const dayOptions = useMemo(
+    () => getBookingDayOptions(locale, shop.workingDays),
+    [locale, shop.workingDays],
+  );
   const bookingDates = useMemo(
-    () => dayOptions.map((d) => d.dateISO),
+    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
     [dayOptions],
   );
   const [categoryId, setCategoryId] = useState(shop.categories[0]?.id ?? "");
-  const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(0);
+  const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(() =>
+    getDefaultBookingDayOffset(dayOptions),
+  );
   const [timeId, setTimeId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const activeCategory =
     shop.categories.find((c) => c.id === categoryId) ?? shop.categories[0];
-  const selectedDay = dayOptions.find((d) => d.offset === dayOffset);
+  const selectedDay = dayOptions.find(
+    (d) => d.offset === dayOffset && d.isOpen,
+  );
   const {
     bookedSlots,
     isLoading: slotsLoading,
@@ -163,13 +171,17 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
                         <button
                           key={day.offset}
                           type="button"
+                          disabled={!day.isOpen}
                           onClick={() => {
+                            if (!day.isOpen) return;
                             setDayOffset(day.offset);
                             setTimeId(null);
                           }}
                           className={cn(
                             "flex flex-col items-center gap-1 border px-1 py-3 transition-colors",
-                            active
+                            !day.isOpen
+                              ? "cursor-not-allowed border-[var(--ko-line)] text-[var(--ko-muted)] opacity-50"
+                              : active
                               ? "border-[var(--ko-pitch)] bg-[var(--ko-pitch)] text-[#04140a]"
                               : "border-[var(--ko-line)] text-[var(--ko-soft)] hover:border-[var(--ko-gold)]",
                           )}
@@ -178,7 +190,7 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
                             {day.label}
                           </span>
                           <span className="text-[0.65rem] opacity-80">
-                            {day.dateLabel}
+                            {day.isOpen ? day.dateLabel : ui.dayClosed}
                           </span>
                         </button>
                       );
@@ -191,11 +203,13 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
                   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {shop.timeSlots.map((slot) => {
                       const active = activeTimeId === slot.id;
-                      const ended = hasTimeSlotEnded(slot.id, dayOffset);
+                      const ended =
+                        !selectedDay || hasTimeSlotEnded(slot.id, dayOffset);
                       const booked =
                         Boolean(selectedDay) && bookedSlots.has(slot.id);
                       const pending = Boolean(selectedDay) && slotsLoading;
-                      const disabled = ended || booked || pending;
+                      const disabled =
+                        !selectedDay || ended || booked || pending;
                       return (
                         <button
                           key={slot.id}

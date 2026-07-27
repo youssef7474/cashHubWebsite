@@ -16,6 +16,7 @@ import { ClockIcon } from "@/themes/barber/icons";
 import {
   getBarberUi,
   getBookingDayOptions,
+  getDefaultBookingDayOffset,
   type BookingDayOffset,
 } from "@/themes/barber/ui";
 
@@ -26,19 +27,26 @@ type MidnightReservationProps = {
 export function MidnightReservation({ shop }: MidnightReservationProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
-  const dayOptions = useMemo(() => getBookingDayOptions(locale), [locale]);
+  const dayOptions = useMemo(
+    () => getBookingDayOptions(locale, shop.workingDays),
+    [locale, shop.workingDays],
+  );
   const bookingDates = useMemo(
-    () => dayOptions.map((d) => d.dateISO),
+    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
     [dayOptions],
   );
   const [activeCategoryId, setActiveCategoryId] = useState<string>(
     shop.categories[0]?.id ?? "all",
   );
-  const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(0);
+  const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(() =>
+    getDefaultBookingDayOffset(dayOptions),
+  );
   const [timeId, setTimeId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const selectedDay = dayOptions.find((d) => d.offset === dayOffset);
+  const selectedDay = dayOptions.find(
+    (d) => d.offset === dayOffset && d.isOpen,
+  );
   const {
     bookedSlots,
     isLoading: slotsLoading,
@@ -191,22 +199,31 @@ export function MidnightReservation({ shop }: MidnightReservationProps) {
                     <li key={day.offset}>
                       <button
                         type="button"
+                        disabled={!day.isOpen}
                         onClick={() => {
+                          if (!day.isOpen) return;
                           setDayOffset(day.offset);
                           setTimeId(null);
                         }}
                         className={cn(
                           "flex w-full flex-col items-start rounded-2xl border px-4 py-3.5 text-start transition-all duration-200",
-                          selected
+                          !day.isOpen
+                            ? "cursor-not-allowed border-brand-900 bg-brand-950/60 text-brand-700"
+                            : selected
                             ? "border-accent-500/50 bg-accent-500/10"
                             : "border-brand-800 bg-brand-900/40 hover:border-brand-700",
                         )}
                       >
-                        <span className="text-sm font-semibold text-brand-50">
+                        <span
+                          className={cn(
+                            "text-sm font-semibold",
+                            day.isOpen ? "text-brand-50" : "text-brand-700",
+                          )}
+                        >
                           {day.label}
                         </span>
                         <span className="mt-1 text-xs text-brand-500">
-                          {day.dateLabel}
+                          {day.isOpen ? day.dateLabel : ui.dayClosed}
                         </span>
                       </button>
                     </li>
@@ -225,10 +242,11 @@ export function MidnightReservation({ shop }: MidnightReservationProps) {
               <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {shop.timeSlots.map((slot) => {
                   const selected = activeTimeId === slot.id;
-                  const ended = hasTimeSlotEnded(slot.id, dayOffset);
+                  const ended =
+                    !selectedDay || hasTimeSlotEnded(slot.id, dayOffset);
                   const booked = Boolean(selectedDay) && bookedSlots.has(slot.id);
                   const pending = Boolean(selectedDay) && slotsLoading;
-                  const disabled = ended || booked || pending;
+                  const disabled = !selectedDay || ended || booked || pending;
                   return (
                     <li key={slot.id}>
                       <button

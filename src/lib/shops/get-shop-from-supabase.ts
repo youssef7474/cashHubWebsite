@@ -21,6 +21,7 @@ import {
   localizePlaceName,
   localizePlaceText,
 } from "./places";
+import { normalizeWorkingDays } from "./working-days";
 
 type JsonObject = Record<string, unknown>;
 
@@ -504,6 +505,7 @@ async function fetchShopWebsite(
         shop.slot_interval_minutes,
         shop.number_of_chairs,
       ),
+      workingDays: normalizeWorkingDays(shop.working_days),
       hours: buildHours(shop),
       contact: {
         phone,

@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import type { ShopAudience } from "@/lib/shops/types";
+import { isShopOpenOnDate } from "@/lib/shops/working-days";
 
 export type BookingDayOffset = 0 | 1 | 2;
 
@@ -28,6 +29,7 @@ const ui = {
     dayToday: "اليوم",
     dayTomorrow: "بكرة",
     dayAfterTomorrow: "بعد بكرة",
+    dayClosed: "مغلق",
     pickTime: "اختر الوقت",
     confirmBooking: "تأكيد الحجز",
     needServiceDayAndTime: "اختر يومًا ووقتًا للمتابعة",
@@ -106,6 +108,7 @@ const ui = {
     dayToday: "Today",
     dayTomorrow: "Tomorrow",
     dayAfterTomorrow: "Day after tomorrow",
+    dayClosed: "Closed",
     pickTime: "Choose a time",
     confirmBooking: "Confirm booking",
     needServiceDayAndTime: "Select a day and a time to continue",
@@ -217,7 +220,10 @@ function toLocalISODate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-export function getBookingDayOptions(locale: Locale) {
+export function getBookingDayOptions(
+  locale: Locale,
+  workingDays?: string[] | null,
+) {
   const now = new Date();
   const copy = ui[locale];
   const labels = [copy.dayToday, copy.dayTomorrow, copy.dayAfterTomorrow];
@@ -229,6 +235,13 @@ export function getBookingDayOptions(locale: Locale) {
       label,
       dateLabel: formatBookingDate(date, locale),
       dateISO: toLocalISODate(date),
+      isOpen: isShopOpenOnDate(date, workingDays),
     };
   });
+}
+
+export function getDefaultBookingDayOffset(
+  dayOptions: Array<{ offset: BookingDayOffset; isOpen: boolean }>,
+): BookingDayOffset | null {
+  return dayOptions.find((day) => day.isOpen)?.offset ?? null;
 }
