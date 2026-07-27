@@ -233,18 +233,23 @@ function buildTimeSlots(
   interval: number | null,
   numberOfChairs: number | null,
 ): ShopTimeSlot[] {
-  const schedule = generateReservationSchedule(
-    normalizeTime24(from ?? "12:00"),
-    normalizeTime24(to ?? "23:00"),
-    interval ?? 60,
-    numberOfChairs ?? 1,
-  );
+  try {
+    const schedule = generateReservationSchedule(
+      normalizeTime24(from ?? "12:00"),
+      normalizeTime24(to ?? "23:00"),
+      interval ?? 60,
+      numberOfChairs ?? 1,
+    );
 
-  return schedule.slots.map((time) => ({
-    // The selected reservation time remains a 24-hour HH:MM value internally.
-    id: time,
-    label: localizedFriendlyTime(time),
-  }));
+    return schedule.slots.map((time) => ({
+      // The selected reservation time remains a 24-hour HH:MM value internally.
+      id: time,
+      label: localizedFriendlyTime(time),
+    }));
+  } catch (err) {
+    console.error("Unable to build reservation time slots:", err);
+    return [];
+  }
 }
 
 function buildHours(shop: ShopRow) {

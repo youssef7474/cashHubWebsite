@@ -114,7 +114,12 @@ export function generateReservationSchedule(
   numberOfChairs: number,
 ): ReservationSchedule {
   const start = time24ToMinutes(from);
-  const end = time24ToMinutes(to);
+  let end = time24ToMinutes(to);
+
+  // Overnight shops (e.g. 12:00 → 03:00) wrap past midnight.
+  if (end < start) {
+    end += 24 * 60;
+  }
 
   if (end <= start) {
     throw new RangeError("Working-hours end must be later than start.");
@@ -136,7 +141,7 @@ export function generateReservationSchedule(
 
   const slots = Array.from({ length: slotCount }, (_, index) => {
     const total = start + index * slotIntervalMinutes;
-    const hour = Math.floor(total / 60);
+    const hour = Math.floor(total / 60) % 24;
     const minute = total % 60;
     return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
   });
