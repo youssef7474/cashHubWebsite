@@ -80,6 +80,8 @@ export type ShopWebsiteData = {
   slug: string;
   subscriptionPlan?: string | null;
   endOfSubscription?: string | null;
+  /** Plan feature flags from the shops.features column. */
+  features?: Record<string, boolean> | null;
   templateId: ShopTemplateId;
   languageMode: ShopLanguageMode;
   audience: ShopAudience;
@@ -130,4 +132,12 @@ export function isShopSubscriptionExpired(
 
   const endTime = Date.parse(endDate);
   return Number.isFinite(endTime) && endTime <= now.getTime();
+}
+
+/** Website is allowed when features is unset (legacy) or website is explicitly true. */
+export function isShopWebsiteFeatureEnabled(
+  shop: Pick<ShopWebsiteData, "features">,
+): boolean {
+  if (!shop.features) return true;
+  return shop.features.website === true;
 }

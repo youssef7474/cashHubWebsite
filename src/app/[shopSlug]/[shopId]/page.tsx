@@ -9,6 +9,7 @@ import { ShopTemplate } from "@/lib/shops/templates";
 import {
   flattenServices,
   isShopSubscriptionExpired,
+  isShopWebsiteFeatureEnabled,
   pickLocale,
   type ShopWebsiteData,
 } from "@/lib/shops/types";
@@ -133,6 +134,17 @@ export async function generateMetadata({
     return {
       title: "انتهى الاشتراك | CashHub",
       description: "انتهى اشتراك هذا المتجر في CashHub.",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  if (!isShopWebsiteFeatureEnabled(shop)) {
+    return {
+      title: "الموقع غير متاح في الخطة | CashHub",
+      description: "ميزة الموقع غير متاحة في خطة هذا المتجر.",
       robots: {
         index: false,
         follow: false,
@@ -287,6 +299,49 @@ function SubscriptionEnded() {
   );
 }
 
+function WebsiteFeatureUnavailable() {
+  return (
+    <main
+      className="relative grid min-h-screen place-items-center overflow-hidden bg-brand-950 px-6 py-16 text-center text-white"
+      dir="rtl"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,162,39,0.18),transparent_48%)]"
+      />
+      <section className="relative mx-auto flex w-full max-w-xl flex-col items-center">
+        <BrandLogo
+          variant="dark"
+          priority
+          className="mb-10 h-auto w-56 max-w-full sm:w-72"
+        />
+        <div className="mb-6 h-px w-20 bg-accent-400" />
+        <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
+          الميزة غير متاحة في الخطة
+        </h1>
+        <p className="mt-5 max-w-md text-lg leading-8 text-brand-300">
+          عذرًا، ميزة الموقع غير متاحة في خطة هذا المتجر. يمكنك الترقية لخطة تدعم
+          موقع الصالون.
+        </p>
+        <p
+          className="mt-3 max-w-md font-english text-sm leading-6 text-brand-400"
+          dir="ltr"
+          lang="en"
+        >
+          The website feature is not included in this shop&apos;s plan. Upgrade
+          to a plan that includes the salon website.
+        </p>
+        <Link
+          href="/#pricing"
+          className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-accent-400 px-7 py-3 font-bold text-brand-950 transition-colors hover:bg-accent-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-400"
+        >
+          عرض الخطط
+        </Link>
+      </section>
+    </main>
+  );
+}
+
 export default async function ShopPage({ params }: ShopPageProps) {
   const { shopSlug, shopId } = await params;
   const shop = await getShopWebsite(shopSlug, shopId);
@@ -297,6 +352,10 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   if (isShopSubscriptionExpired(shop)) {
     return <SubscriptionEnded />;
+  }
+
+  if (!isShopWebsiteFeatureEnabled(shop)) {
+    return <WebsiteFeatureUnavailable />;
   }
 
   const template = (

@@ -16,6 +16,11 @@ import {
   localizedFriendlyTime,
   normalizeTime24,
 } from "./time";
+import {
+  localizeAddressParts,
+  localizePlaceName,
+  localizePlaceText,
+} from "./places";
 
 type JsonObject = Record<string, unknown>;
 
@@ -25,6 +30,7 @@ type ShopRow = {
   shop_number: string | null;
   subscription_plan: string | null;
   end_of_subscription: string | null;
+  features: unknown;
   type: string | null;
   location: string | null;
   country: string | null;
@@ -89,7 +95,18 @@ function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function localized(value: unknown, fallback = ""): LocalizedString {
+function normalizeFallback(fallback: string | LocalizedString = ""): LocalizedString {
+  return typeof fallback === "string"
+    ? { ar: fallback, en: fallback }
+    : fallback;
+}
+
+function localized(
+  value: unknown,
+  fallback: string | LocalizedString = "",
+): LocalizedString {
+  const fb = normalizeFallback(fallback);
+
   if (typeof value === "string") {
     return { ar: value, en: value };
   }
@@ -97,21 +114,20 @@ function localized(value: unknown, fallback = ""): LocalizedString {
   if (isObject(value)) {
     const ar = stringValue(value.ar);
     const en = stringValue(value.en);
-    const first = ar ?? en ?? fallback;
 
     return {
-      ar: ar ?? first,
-      en: en ?? first,
+      ar: ar ?? (fb.ar || en || ""),
+      en: en ?? (fb.en || ar || ""),
     };
   }
 
-  return { ar: fallback, en: fallback };
+  return { ar: fb.ar, en: fb.en };
 }
 
 function localizedField(
   source: JsonObject,
   key: string,
-  fallback = "",
+  fallback: string | LocalizedString = "",
 ): LocalizedString {
   const direct = source[key];
   if (typeof direct === "string" || isObject(direct)) {
@@ -126,7 +142,7 @@ function localizedField(
 function localizedFirstField(
   source: JsonObject,
   keys: string[],
-  fallback = "",
+  fallback: string | LocalizedString = "",
 ): LocalizedString {
   for (const key of keys) {
     const value = localizedField(source, key);
@@ -189,6 +205,19 @@ function templateId(value: number | undefined): ShopTemplateId {
 
 function languageMode(value: string | undefined): ShopLanguageMode {
   return value === "en" || value === "ar" ? value : "bilingual";
+}
+
+function parseFeatures(value: unknown): Record<string, boolean> | null {
+  if (!isObject(value)) return null;
+
+  const features: Record<string, boolean> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "boolean") {
+      features[key] = entry;
+    }
+  }
+
+  return Object.keys(features).length ? features : null;
 }
 
 function audienceFromType(type: string | null): "men" | "women" {
@@ -366,7 +395,7 @@ async function fetchShopWebsite(
       supabase
         .from("shops")
         .select(
-          "id, shop_name, shop_number, subscription_plan, end_of_subscription, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
+          "id, shop_name, shop_number, subscription_plan, end_of_subscription, features, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
         )
         .eq("id", shopId)
         .maybeSingle(),
@@ -395,104 +424,155 @@ async function fetchShopWebsite(
     configResult.error;
 
   if (error) {
-    throw new Error(`Unable to load shop website: ${error.message}`);
+    console.error("Unable to load shop website:", error.message);
+    return null;
   }
 
   if (!shopResult.data) return null;
 
-  const shop = shopResult.data as ShopRow;
-  const categories = (categoriesResult.data ?? []) as CategoryRow[];
-  const services = (servicesResult.data ?? []) as ServiceRow[];
-  const config = configResult.data as WebsiteConfigRow | null;
-  const hero = isObject(config?.hero) ? config.hero : {};
-  const about = isObject(config?.about) ? config.about : {};
-  const social = isObject(config?.social) ? config.social : {};
-  const seo = isObject(config?.seo) ? config.seo : {};
-  const shopName = shop.shop_name ?? "Shop";
-  const address = [shop.location, shop.country].filter(Boolean).join(", ");
-  const phone = optionalString(social, "phone") ?? shop.shop_number ?? "";
-  const whatsapp =
-    optionalString(social, "whatsapp", "whats_app") ??
-    phone.replace(/\D/g, "");
+  try {
+    const shop = shopResult.data as ShopRow;
+    const categories = (categoriesResult.data ?? []) as CategoryRow[];
+    const services = (servicesResult.data ?? []) as ServiceRow[];
+    const config = configResult.data as WebsiteConfigRow | null;
+    const hero = isObject(config?.hero) ? config.hero : {};
+    const about = isObject(config?.about) ? config.about : {};
+    const social = isObject(config?.social) ? config.social : {};
+    const seo = isObject(config?.seo) ? config.seo : {};
+    const shopName = shop.shop_name ?? "Shop";
+    const address = localizeAddressParts(shop.location, shop.country);
+    const location = localizePlaceName(shop.location ?? "");
+    const country = localizePlaceName(shop.country ?? "");
+    const phone = optionalString(social, "phone") ?? shop.shop_number ?? "";
+    const whatsapp =
+      optionalString(social, "whatsapp", "whats_app") ??
+      phone.replace(/\D/g, "");
 
-  return {
-    id: shop.id,
-    slug: shopSlug,
-    subscriptionPlan: shop.subscription_plan,
-    endOfSubscription: shop.end_of_subscription,
-    templateId: templateId(config?.theme),
-    languageMode: languageMode(config?.language_mode),
-    audience: audienceFromType(shop.type),
-    name: localizedField(hero, "name", shopName),
-    tagline: localizedField(
-      hero,
-      "tagline",
-      shop.type ?? "Welcome",
-    ),
-    description: localizedField(
-      hero,
-      "description",
-      localizedField(seo, "description", address).en,
-    ),
-    hero: {
-      title: localizedFirstField(
+    return {
+      id: shop.id,
+      slug: shopSlug,
+      subscriptionPlan: shop.subscription_plan,
+      endOfSubscription: shop.end_of_subscription,
+      features: parseFeatures(shop.features),
+      templateId: templateId(config?.theme),
+      languageMode: languageMode(config?.language_mode),
+      audience: audienceFromType(shop.type),
+      name: localizedField(hero, "name", shopName),
+      tagline: localizedField(
         hero,
-        ["headline", "title", "name"],
-        shopName,
-      ),
-      subtitle: localizedFirstField(
-        hero,
-        ["subheadline", "subtitle", "tagline"],
+        "tagline",
         shop.type ?? "Welcome",
       ),
-      ctaText: localizedFirstField(
+      description: localizedField(
         hero,
-        ["ctaText", "cta_text", "buttonText", "button_text", "cta"],
+        "description",
+        localizedField(seo, "description", address),
       ),
-    },
-    about: {
-      title: localizedField(about, "title", "About us"),
-      body: localizedFirstField(about, ["body", "description"], address),
-      highlights: mapHighlights(config?.advantages, about, shop),
-    },
-    categories: mapCategories(categories, services),
-    timeSlots: buildTimeSlots(
-      shop.working_hours_from,
-      shop.working_hours_to,
-      shop.slot_interval_minutes,
-      shop.number_of_chairs,
-    ),
-    hours: buildHours(shop),
-    contact: {
-      phone,
-      whatsapp: whatsapp.replace(/\D/g, ""),
-      address: localizedField(social, "address", address),
-      mapUrl: optionalString(social, "mapUrl", "map_url"),
-      facebook: optionalString(social, "facebook"),
-      instagram: optionalString(social, "instagram"),
-      tiktok: optionalString(social, "tiktok"),
-    },
-    faqs: mapFaq(config?.faq),
-    seo: {
-      title: localizedFirstField(seo, ["title", "metaTitle", "meta_title"]),
-      description: localizedFirstField(
-        seo,
-        ["description", "metaDescription", "meta_description"],
+      hero: {
+        title: localizedFirstField(
+          hero,
+          ["headline", "title", "name"],
+          shopName,
+        ),
+        subtitle: localizedFirstField(
+          hero,
+          ["subheadline", "subtitle", "tagline"],
+          shop.type ?? "Welcome",
+        ),
+        ctaText: localizedFirstField(
+          hero,
+          ["ctaText", "cta_text", "buttonText", "button_text", "cta"],
+        ),
+      },
+      about: {
+        title: localizedField(about, "title", {
+          ar: "من نحن",
+          en: "About us",
+        }),
+        body: localizedFirstField(about, ["body", "description"], address),
+        highlights: mapHighlights(config?.advantages, about, shop),
+      },
+      categories: mapCategories(categories, services),
+      timeSlots: buildTimeSlots(
+        shop.working_hours_from,
+        shop.working_hours_to,
+        shop.slot_interval_minutes,
+        shop.number_of_chairs,
       ),
-      keywords: localizedKeywords(seo),
-      location: localizedFirstField(
-        seo,
-        ["location", "area"],
-        shop.location ?? "",
-      ),
-      country: localizedFirstField(seo, ["country"], shop.country ?? ""),
-      businessType: localizedFirstField(
-        seo,
-        ["businessType", "business_type", "type"],
-        shop.type ?? "",
-      ),
-    },
-  };
+      hours: buildHours(shop),
+      contact: {
+        phone,
+        whatsapp: whatsapp.replace(/\D/g, ""),
+        address: (() => {
+          const configured = localizedField(social, "address");
+          if (configured.ar || configured.en) {
+            return {
+              ar: configured.ar
+                ? localizePlaceText(configured.ar).ar
+                : configured.en
+                  ? localizePlaceText(configured.en).ar
+                  : address.ar,
+              en: configured.en
+                ? localizePlaceText(configured.en).en
+                : configured.ar
+                  ? localizePlaceText(configured.ar).en
+                  : address.en,
+            };
+          }
+          return address;
+        })(),
+        mapUrl: optionalString(social, "mapUrl", "map_url"),
+        facebook: optionalString(social, "facebook"),
+        instagram: optionalString(social, "instagram"),
+        tiktok: optionalString(social, "tiktok"),
+      },
+      faqs: mapFaq(config?.faq),
+      seo: {
+        title: localizedFirstField(seo, ["title", "metaTitle", "meta_title"]),
+        description: localizedFirstField(
+          seo,
+          ["description", "metaDescription", "meta_description"],
+        ),
+        keywords: localizedKeywords(seo),
+        location: (() => {
+          const configured = localizedFirstField(seo, ["location", "area"]);
+          if (configured.ar || configured.en) {
+            return {
+              ar: configured.ar
+                ? localizePlaceText(configured.ar).ar
+                : location.ar,
+              en: configured.en
+                ? localizePlaceText(configured.en).en
+                : location.en,
+            };
+          }
+          return location;
+        })(),
+        country: (() => {
+          const configured = localizedFirstField(seo, ["country"]);
+          if (configured.ar || configured.en) {
+            return {
+              ar: configured.ar
+                ? localizePlaceName(configured.ar).ar
+                : country.ar,
+              en: configured.en
+                ? localizePlaceName(configured.en).en
+                : country.en,
+            };
+          }
+          return country;
+        })(),
+        businessType: localizedFirstField(
+          seo,
+          ["businessType", "business_type", "type"],
+          shop.type ?? "",
+        ),
+      },
+    };
+  } catch (err) {
+    console.error("Failed to map shop website data:", err);
+    return null;
+  }
 }
 
 // generateMetadata and the page both call this function during one request.

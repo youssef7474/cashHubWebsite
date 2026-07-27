@@ -79,7 +79,7 @@ export function Pricing() {
             </div>
           ))}
 
-          {[0, 1].map((placeholder) => (
+          {Array.from({ length: Math.max(0, 3 - t.pricing.plans.length) }).map((_, placeholder) => (
             <div
               key={placeholder}
               className="relative flex min-h-72 flex-col items-center justify-center overflow-hidden rounded-2xl border border-brand-200/80 bg-linear-to-b from-brand-50 to-white p-8 text-center"
