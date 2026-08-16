@@ -255,8 +255,16 @@ function buildTimeSlots(
 
 function buildHours(shop: ShopRow) {
   const rawDays = Array.isArray(shop.working_days) ? shop.working_days : [];
-  const from = normalizeTime24(shop.working_hours_from ?? "12:00");
-  const to = normalizeTime24(shop.working_hours_to ?? "23:00");
+  let from: string;
+  let to: string;
+  try {
+    from = normalizeTime24(shop.working_hours_from ?? "12:00");
+    to = normalizeTime24(shop.working_hours_to ?? "23:00");
+  } catch (err) {
+    console.error("Unable to build shop hours:", err);
+    from = "12:00";
+    to = "23:00";
+  }
   const hours = {
     ar: `${localizedFriendlyTime(from).ar} — ${localizedFriendlyTime(to).ar}`,
     en: `${localizedFriendlyTime(from).en} — ${localizedFriendlyTime(to).en}`,
