@@ -1,0 +1,2 @@
+- [WhatsApp number format](whatsapp_number_format.md) — Egyptian local numbers need "2" prepended (not "20"-replace) for wa.me links
+- [Shop WhatsApp messaging](shop_whatsapp_messaging.md) — shop pages use getShopWhatsAppUrl for pre-filled per-shop booking messages, mirroring home page pattern

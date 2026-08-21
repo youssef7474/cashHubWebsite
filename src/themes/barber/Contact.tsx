@@ -10,6 +10,7 @@ import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { MapPinIcon, PhoneIcon, ClockIcon } from "./icons";
 import { getBarberUi } from "./ui";
+import { getShopWhatsAppUrl } from "@/lib/whatsapp";
 
 type BarberContactProps = {
   shop: ShopWebsiteData;
@@ -101,13 +102,18 @@ export function BarberContact({ shop }: BarberContactProps) {
               <div className="flex flex-col items-start gap-4 sm:items-end">
                 <ShopSocialLinks
                   contact={contact}
+                  shopName={shop.name}
                   variant="barber"
                   label={ui.socialTitle}
                 />
                 <Button
                   variant="secondary"
                   size="md"
-                  href={`https://wa.me/${contact.whatsapp}`}
+                  href={getShopWhatsAppUrl(
+                    contact.whatsapp,
+                    pickLocale(shop.name, locale),
+                    locale,
+                  )}
                 >
                   {ui.contactUs}
                 </Button>

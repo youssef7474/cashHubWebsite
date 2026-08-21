@@ -458,9 +458,16 @@ async function fetchShopWebsite(
     const location = localizePlaceName(shop.location ?? "");
     const country = localizePlaceName(shop.country ?? "");
     const phone = optionalString(social, "phone") ?? shop.shop_number ?? "";
+    const whatsappDigits = (
+      optionalString(social, "whatsapp", "whats_app") ?? phone
+    ).replace(/\D/g, "");
+    // Shop numbers are stored in local Egyptian format (leading 0, no country
+    // code), e.g. "01001234567". WhatsApp needs the country code instead of
+    // the leading 0, so "2" + "01001234567" -> "201001234567".
     const whatsapp =
-      optionalString(social, "whatsapp", "whats_app") ??
-      phone.replace(/\D/g, "");
+      whatsappDigits && !whatsappDigits.startsWith("20")
+        ? `2${whatsappDigits}`
+        : whatsappDigits;
 
     return {
       id: shop.id,
@@ -517,7 +524,7 @@ async function fetchShopWebsite(
       hours: buildHours(shop),
       contact: {
         phone,
-        whatsapp: whatsapp.replace(/\D/g, ""),
+        whatsapp,
         address: (() => {
           const configured = localizedField(social, "address");
           if (configured.ar || configured.en) {

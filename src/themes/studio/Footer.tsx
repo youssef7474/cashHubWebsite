@@ -35,6 +35,7 @@ export function StudioFooter({ shop }: StudioFooterProps) {
             </p>
             <ShopSocialLinks
               contact={shop.contact}
+              shopName={shop.name}
               variant="barber"
               className="mt-5"
               label={ui.socialTitle}

@@ -91,6 +91,7 @@ export function KickoffStadium({ shop }: KickoffStadiumProps) {
 
               <ShopSocialLinks
                 contact={contact}
+                shopName={shop.name}
                 variant="kickoff"
                 className="mt-8"
                 label={ui.socialTitle}

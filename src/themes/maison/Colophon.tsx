@@ -29,6 +29,7 @@ export function MaisonColophon({ shop }: MaisonColophonProps) {
           </p>
           <ShopSocialLinks
             contact={shop.contact}
+            shopName={shop.name}
             variant="maison"
             className="mt-5"
             label={ui.socialTitle}

@@ -29,6 +29,7 @@ export function FleurFooter({ shop }: FleurFooterProps) {
           </p>
           <ShopSocialLinks
             contact={shop.contact}
+            shopName={shop.name}
             variant="fleur"
             className="mt-5"
             label={ui.socialTitle}

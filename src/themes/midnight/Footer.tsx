@@ -36,6 +36,7 @@ export function MidnightFooter({ shop }: MidnightFooterProps) {
             </p>
             <ShopSocialLinks
               contact={shop.contact}
+              shopName={shop.name}
               variant="midnight"
               className="mt-5"
               label={ui.socialTitle}

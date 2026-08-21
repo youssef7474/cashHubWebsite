@@ -6,6 +6,7 @@ import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { getBarberUi } from "@/themes/barber/ui";
+import { getShopWhatsAppUrl } from "@/lib/whatsapp";
 
 type StudioFindProps = {
   shop: ShopWebsiteData;
@@ -61,7 +62,11 @@ export function StudioFind({ shop }: StudioFindProps) {
 
                   <div className="mt-8 flex flex-wrap gap-3">
                     <a
-                      href={`https://wa.me/${contact.whatsapp}`}
+                      href={getShopWhatsAppUrl(
+                        contact.whatsapp,
+                        pickLocale(shop.name, locale),
+                        locale,
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="studio-btn studio-btn-primary"
@@ -82,6 +87,7 @@ export function StudioFind({ shop }: StudioFindProps) {
 
                   <ShopSocialLinks
                     contact={contact}
+                    shopName={shop.name}
                     variant="studio"
                     className="mt-8"
                     label={ui.socialTitle}

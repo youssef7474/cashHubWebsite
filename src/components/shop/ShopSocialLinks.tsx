@@ -2,8 +2,10 @@
 
 import { useLocale } from "@/providers/LocaleProvider";
 import { cn } from "@/lib/utils/cn";
-import type { ShopContact } from "@/lib/shops/types";
+import type { ShopContact, LocalizedString } from "@/lib/shops/types";
+import { pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "@/themes/barber/ui";
+import { getShopWhatsAppUrl } from "@/lib/whatsapp";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -21,6 +23,7 @@ export type ShopSocialVariant =
 
 type ShopSocialLinksProps = {
   contact: ShopContact;
+  shopName?: LocalizedString;
   variant?: ShopSocialVariant;
   className?: string;
   label?: string;
@@ -62,7 +65,10 @@ const VARIANT_STYLES: Record<
   },
 };
 
-function buildSocialItems(contact: ShopContact) {
+function buildSocialItems(
+  contact: ShopContact,
+  whatsappHref: string | undefined,
+) {
   const items = [
     {
       key: "facebook" as const,
@@ -81,9 +87,7 @@ function buildSocialItems(contact: ShopContact) {
     },
     {
       key: "whatsapp" as const,
-      href: contact.whatsapp
-        ? `https://wa.me/${contact.whatsapp}`
-        : undefined,
+      href: whatsappHref,
       Icon: WhatsAppIcon,
     },
   ];
@@ -95,13 +99,21 @@ function buildSocialItems(contact: ShopContact) {
 
 export function ShopSocialLinks({
   contact,
+  shopName,
   variant = "barber",
   className,
   label,
 }: ShopSocialLinksProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
-  const items = buildSocialItems(contact);
+  const whatsappHref = contact.whatsapp
+    ? getShopWhatsAppUrl(
+        contact.whatsapp,
+        shopName ? pickLocale(shopName, locale) : "",
+        locale,
+      )
+    : undefined;
+  const items = buildSocialItems(contact, whatsappHref);
   if (items.length === 0) return null;
 
   const styles = VARIANT_STYLES[variant];

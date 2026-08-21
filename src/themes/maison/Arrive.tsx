@@ -91,6 +91,7 @@ export function MaisonArrive({ shop }: MaisonArriveProps) {
 
               <ShopSocialLinks
                 contact={contact}
+                shopName={shop.name}
                 variant="maison"
                 className="mt-8"
                 label={ui.socialTitle}

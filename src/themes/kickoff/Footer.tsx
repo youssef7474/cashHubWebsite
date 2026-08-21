@@ -29,6 +29,7 @@ export function KickoffFooter({ shop }: KickoffFooterProps) {
           </p>
           <ShopSocialLinks
             contact={shop.contact}
+            shopName={shop.name}
             variant="kickoff"
             className="mt-5"
             label={ui.socialTitle}

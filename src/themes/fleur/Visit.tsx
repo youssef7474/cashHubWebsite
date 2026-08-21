@@ -89,6 +89,7 @@ export function FleurVisit({ shop }: FleurVisitProps) {
 
               <ShopSocialLinks
                 contact={contact}
+                shopName={shop.name}
                 variant="fleur"
                 className="mt-8"
                 label={ui.socialTitle}
