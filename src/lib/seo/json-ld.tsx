@@ -21,8 +21,14 @@ export function SeoJsonLd() {
     ...ar.features.items.map((item) => item.title),
     ...en.features.items.map((item) => item.title),
   ];
-  const lowestPrice = Math.min(...ar.pricing.plans.map((p) => p.priceNum));
-  const highestPrice = Math.max(...ar.pricing.plans.map((p) => p.priceNum));
+  const allPrices = [
+    ...ar.pricing.plans.map((p) => p.priceNum),
+    ar.pricing.addon.priceNum,
+    ...ar.pricing.social.plans.map((p) => p.priceNum),
+    ...ar.pricing.bundles.items.map((p) => p.priceNum),
+  ];
+  const lowestPrice = Math.min(...allPrices);
+  const highestPrice = Math.max(...allPrices);
 
   const organization = {
     "@context": "https://schema.org",
@@ -72,10 +78,10 @@ export function SeoJsonLd() {
     featureList: features,
     offers: {
       "@type": "AggregateOffer",
-      priceCurrency: "SAR",
+      priceCurrency: "EGP",
       lowPrice: String(lowestPrice),
       highPrice: String(highestPrice),
-      offerCount: ar.pricing.plans.length,
+      offerCount: allPrices.length,
       availability: "https://schema.org/InStock",
       url: `${siteUrl}/#pricing`,
     },

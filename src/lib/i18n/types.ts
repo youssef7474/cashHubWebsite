@@ -30,6 +30,41 @@ export type PricingPlan = {
   description: string;
   features: string[];
   highlighted?: boolean;
+  badge?: string;
+  cta: string;
+};
+
+export type PricingAddon = {
+  name: string;
+  price: string;
+  priceNum: number;
+  period: string;
+  included: string[];
+  cta: string;
+};
+
+export type PricingSocialPlan = {
+  name: string;
+  price: string;
+  priceNum: number;
+  period: string;
+  includesNote: string;
+  stats: { value: string; label: string }[];
+  editingLabel: string;
+  cta: string;
+};
+
+export type PricingBundle = {
+  name: string;
+  description: string;
+  price: string;
+  priceNum: number;
+  originalPrice: string;
+  period: string;
+  savings: string;
+  badge?: string;
+  highlighted?: boolean;
+  noTrialNote?: string;
   cta: string;
 };
 
@@ -110,10 +145,20 @@ export type Dictionary = {
     badge: string;
     title: string;
     subtitle: string;
-    popular: string;
-    comingSoon: string;
-    comingSoonDescription: string;
     plans: PricingPlan[];
+    addon: PricingAddon;
+    social: {
+      title: string;
+      subtitle: string;
+      plans: PricingSocialPlan[];
+      note: string;
+      trialNote: string;
+    };
+    bundles: {
+      title: string;
+      subtitle: string;
+      items: PricingBundle[];
+    };
   };
   testimonials: {
     badge: string;
