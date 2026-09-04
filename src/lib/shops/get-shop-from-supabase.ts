@@ -27,6 +27,7 @@ type JsonObject = Record<string, unknown>;
 
 type ShopRow = {
   id: string;
+  public_number: number | null;
   shop_name: string | null;
   shop_number: string | null;
   subscription_plan: string | null;
@@ -57,6 +58,7 @@ type ServiceRow = {
 };
 
 type WebsiteConfigRow = {
+  shop_id: string;
   theme: number;
   language_mode: string;
   hero: unknown;
@@ -400,55 +402,71 @@ function mapCategories(
 
 async function fetchShopWebsite(
   shopSlug: string,
-  shopId: string,
+  publicNumberParam: string,
 ): Promise<ShopWebsiteData | null> {
+  const publicNumber = Number(publicNumberParam);
+  if (!Number.isInteger(publicNumber) || publicNumber <= 0) return null;
+
   const supabase = await createClient();
 
-  const [shopResult, categoriesResult, servicesResult, configResult] =
-    await Promise.all([
-      supabase
-        .from("shops")
-        .select(
-          "id, shop_name, shop_number, subscription_plan, end_of_subscription, features, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
-        )
-        .eq("id", shopId)
-        .maybeSingle(),
-      supabase
-        .from("catigories")
-        .select("id, title, description")
-        .eq("shop_id", shopId)
-        .order("id"),
-      supabase
-        .from("services")
-        .select("id, category_id, name, description, price")
-        .eq("shop_id", shopId)
-        .eq("is_active", true)
-        .order("id"),
-      supabase
-        .from("shop_website_configs")
-        .select("theme, language_mode, hero, about, advantages, social, faq, seo")
-        .eq("shop_id", shopId)
-        .maybeSingle(),
-    ]);
+  // The URL never carries the Supabase id: resolve the shop_id from the
+  // slug, then cross-check it against the public_number from the URL
+  // before trusting it. A slug/public_number pair that doesn't match the
+  // same shop is treated as not found.
+  const configLookup = await supabase
+    .from("shop_website_configs")
+    .select(
+      "shop_id, theme, language_mode, hero, about, advantages, social, faq, seo",
+    )
+    .eq("slug", shopSlug)
+    .maybeSingle();
 
-  const error =
-    shopResult.error ??
-    categoriesResult.error ??
-    servicesResult.error ??
-    configResult.error;
+  if (configLookup.error) {
+    console.error("Unable to load shop website:", configLookup.error.message);
+    return null;
+  }
+
+  const config = configLookup.data as WebsiteConfigRow | null;
+  if (!config) return null;
+
+  const shopId = config.shop_id;
+
+  const [shopResult, categoriesResult, servicesResult] = await Promise.all([
+    supabase
+      .from("shops")
+      .select(
+        "id, public_number, shop_name, shop_number, subscription_plan, end_of_subscription, features, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
+      )
+      .eq("id", shopId)
+      .eq("public_number", publicNumber)
+      .maybeSingle(),
+    supabase
+      .from("catigories")
+      .select("id, title, description")
+      .eq("shop_id", shopId)
+      .order("id"),
+    supabase
+      .from("services")
+      .select("id, category_id, name, description, price")
+      .eq("shop_id", shopId)
+      .eq("is_active", true)
+      .order("id"),
+  ]);
+
+  const error = shopResult.error ?? categoriesResult.error ?? servicesResult.error;
 
   if (error) {
     console.error("Unable to load shop website:", error.message);
     return null;
   }
 
+  // The public_number didn't match the shop the slug points to.
   if (!shopResult.data) return null;
 
   try {
     const shop = shopResult.data as ShopRow;
     const categories = (categoriesResult.data ?? []) as CategoryRow[];
     const services = (servicesResult.data ?? []) as ServiceRow[];
-    const config = configResult.data as WebsiteConfigRow | null;
     const hero = isObject(config?.hero) ? config.hero : {};
     const about = isObject(config?.about) ? config.about : {};
     const social = isObject(config?.social) ? config.social : {};

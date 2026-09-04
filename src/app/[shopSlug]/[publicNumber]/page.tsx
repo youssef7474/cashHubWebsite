@@ -18,11 +18,11 @@ import { LocaleProvider } from "@/providers/LocaleProvider";
 type ShopPageProps = {
   params: Promise<{
     shopSlug: string;
-    shopId: string;
+    publicNumber: string;
   }>;
 };
 
-function shopUrl(shopSlug: string, shopId: string) {
+function shopUrl(shopSlug: string, publicNumber: string) {
   let decodedSlug = shopSlug;
   try {
     decodedSlug = decodeURIComponent(shopSlug);
@@ -30,7 +30,7 @@ function shopUrl(shopSlug: string, shopId: string) {
     // Keep the original route value if it is not valid percent-encoding.
   }
 
-  const path = `/${encodeURIComponent(decodedSlug)}/${encodeURIComponent(shopId)}`;
+  const path = `/${encodeURIComponent(decodedSlug)}/${encodeURIComponent(publicNumber)}`;
   return new URL(path, `${getSiteUrl()}/`).toString();
 }
 
@@ -123,8 +123,8 @@ function localizedSeo(shop: ShopWebsiteData, locale: Locale) {
 export async function generateMetadata({
   params,
 }: ShopPageProps): Promise<Metadata> {
-  const { shopSlug, shopId } = await params;
-  const shop = await getShopWebsite(shopSlug, shopId);
+  const { shopSlug, publicNumber } = await params;
+  const shop = await getShopWebsite(shopSlug, publicNumber);
 
   if (!shop) {
     return { title: "المتجر غير موجود" };
@@ -157,7 +157,7 @@ export async function generateMetadata({
     shop,
     metadataLocale,
   );
-  const canonical = shopUrl(shopSlug, shopId);
+  const canonical = shopUrl(shopSlug, publicNumber);
   const locale = metadataLocale === "ar" ? "ar_SA" : "en_US";
 
   return {
@@ -343,8 +343,8 @@ function WebsiteFeatureUnavailable() {
 }
 
 export default async function ShopPage({ params }: ShopPageProps) {
-  const { shopSlug, shopId } = await params;
-  const shop = await getShopWebsite(shopSlug, shopId);
+  const { shopSlug, publicNumber } = await params;
+  const shop = await getShopWebsite(shopSlug, publicNumber);
 
   if (!shop) {
     notFound();
@@ -360,7 +360,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   const template = (
     <>
-      <ShopStructuredData shop={shop} url={shopUrl(shopSlug, shopId)} />
+      <ShopStructuredData shop={shop} url={shopUrl(shopSlug, publicNumber)} />
       <ShopTemplate shop={shop} />
     </>
   );
