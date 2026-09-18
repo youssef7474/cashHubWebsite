@@ -3,7 +3,7 @@
 import { useLocale } from "@/providers/LocaleProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { getBarberUi } from "@/themes/barber/ui";
 
@@ -19,7 +19,12 @@ export function StudioFooter({ shop }: StudioFooterProps) {
 
   const links = [
     { href: "#story", label: ui.navAbout },
-    { href: "#book", label: ui.navBook },
+    {
+      href: "#book",
+      label: isShopReservationFeatureEnabled(shop)
+        ? ui.navBook
+        : ui.navServices,
+    },
     { href: "#faq", label: ui.navFaq },
     { href: "#find", label: ui.navContact },
   ];

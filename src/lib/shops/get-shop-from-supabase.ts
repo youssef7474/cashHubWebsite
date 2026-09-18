@@ -6,11 +6,13 @@ import type {
   ShopHighlight,
   ShopHighlightIcon,
   ShopLanguageMode,
+  ShopPaymentMethod,
   ShopServiceCategory,
   ShopTemplateId,
   ShopTimeSlot,
   ShopWebsiteData,
 } from "./types";
+import { SHOP_PAYMENT_METHODS } from "./types";
 import {
   generateReservationSchedule,
   localizedFriendlyTime,
@@ -33,6 +35,7 @@ type ShopRow = {
   subscription_plan: string | null;
   end_of_subscription: string | null;
   features: unknown;
+  payment_methods: unknown;
   type: string | null;
   location: string | null;
   country: string | null;
@@ -221,6 +224,19 @@ function parseFeatures(value: unknown): Record<string, boolean> | null {
   }
 
   return Object.keys(features).length ? features : null;
+}
+
+/** Keeps only the payment methods the website knows how to display, in canonical order. */
+function parsePaymentMethods(value: unknown): ShopPaymentMethod[] {
+  if (!Array.isArray(value)) return [];
+
+  const enabled = new Set(
+    value
+      .filter((entry): entry is string => typeof entry === "string")
+      .map((entry) => entry.trim().toLowerCase()),
+  );
+
+  return SHOP_PAYMENT_METHODS.filter((method) => enabled.has(method));
 }
 
 function audienceFromType(type: string | null): "men" | "women" {
@@ -435,7 +451,7 @@ async function fetchShopWebsite(
     supabase
       .from("shops")
       .select(
-        "id, public_number, shop_name, shop_number, subscription_plan, end_of_subscription, features, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
+        "id, public_number, shop_name, shop_number, subscription_plan, end_of_subscription, features, payment_methods, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
       )
       .eq("id", shopId)
       .eq("public_number", publicNumber)
@@ -493,6 +509,7 @@ async function fetchShopWebsite(
       subscriptionPlan: shop.subscription_plan,
       endOfSubscription: shop.end_of_subscription,
       features: parseFeatures(shop.features),
+      paymentMethods: parsePaymentMethods(shop.payment_methods),
       templateId: templateId(config?.theme),
       languageMode: languageMode(config?.language_mode),
       audience: audienceFromType(shop.type),

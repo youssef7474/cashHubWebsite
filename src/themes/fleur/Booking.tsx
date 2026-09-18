@@ -5,7 +5,8 @@ import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils/cn";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
+import { ShopPaymentMethods } from "@/components/shop/ShopPaymentMethods";
 import { hasTimeSlotEnded } from "@/lib/shops/time";
 import { ReservationModal } from "@/components/reservation/ReservationModal";
 import { useBookedSlots } from "@/components/reservation/useBookedSlots";
@@ -27,13 +28,16 @@ type FleurBookingProps = {
 export function FleurBooking({ shop }: FleurBookingProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
+  const canBook = isShopReservationFeatureEnabled(shop);
   const dayOptions = useMemo(
     () => getBookingDayOptions(locale, shop.workingDays),
     [locale, shop.workingDays],
   );
+  // No booking → no availability lookups.
   const bookingDates = useMemo(
-    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
-    [dayOptions],
+    () =>
+      canBook ? dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO) : [],
+    [canBook, dayOptions],
   );
   const [categoryId, setCategoryId] = useState(shop.categories[0]?.id ?? "");
   const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(() =>
@@ -69,19 +73,25 @@ export function FleurBooking({ shop }: FleurBookingProps) {
     <section id="booking" className="py-20 lg:py-28">
       <div className="fleur-shell">
         <Reveal className="mx-auto flex max-w-xl flex-col items-center text-center">
-          <p className="fleur-eyebrow">{ui.bookBadge}</p>
+          <p className="fleur-eyebrow">
+            {canBook ? ui.bookBadge : ui.servicesBadge}
+          </p>
           <h2 className="fleur-display mt-5 text-4xl text-[var(--fleur-plum)] sm:text-5xl lg:text-[3.5rem]">
-            {ui.bookTitle}
+            {canBook ? ui.bookTitle : ui.servicesTitle}
           </h2>
-          <p className="mt-4 text-[var(--fleur-soft)]">{ui.bookSubtitle}</p>
+          <p className="mt-4 text-[var(--fleur-soft)]">
+            {canBook ? ui.bookSubtitle : ui.servicesSubtitle}
+          </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="mt-14 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           {/* Services column */}
-          <div className="lg:col-span-7">
+          <div
+            className={cn("min-w-0", canBook ? "lg:col-span-7" : "lg:col-span-8 lg:col-start-3")}
+          >
             <Reveal delay={40}>
               <div
-                className="flex gap-2 overflow-x-auto pb-1"
+                className="flex flex-wrap gap-2"
                 role="tablist"
                 aria-label={ui.pickCategory}
               >
@@ -95,7 +105,7 @@ export function FleurBooking({ shop }: FleurBookingProps) {
                       aria-selected={active}
                       onClick={() => setCategoryId(cat.id)}
                       className={cn(
-                        "shrink-0 rounded-full border px-4 py-2.5 text-[0.7rem] font-semibold tracking-[0.14em] uppercase transition-colors",
+                        "rounded-full border px-4 py-2.5 text-[0.7rem] font-semibold tracking-[0.14em] uppercase transition-colors",
                         active
                           ? "border-[var(--fleur-rose)] bg-[var(--fleur-rose)] text-white"
                           : "border-[var(--fleur-line)] text-[var(--fleur-soft)] hover:border-[var(--fleur-rose)]/60 hover:text-[var(--fleur-rose-deep)]",
@@ -141,10 +151,15 @@ export function FleurBooking({ shop }: FleurBookingProps) {
                 );
               })}
             </ul>
+
+            <Reveal delay={120}>
+              <ShopPaymentMethods shop={shop} variant="fleur" className="mt-8" />
+            </Reveal>
           </div>
 
           {/* Sticky booking panel */}
-          <div className="lg:col-span-5">
+          {canBook ? (
+          <div className="min-w-0 lg:col-span-5">
             <Reveal delay={100}>
               <aside className="fleur-card p-6 sm:p-8 lg:sticky lg:top-10">
                 <p className="fleur-eyebrow">{ui.pickDay}</p>
@@ -236,10 +251,11 @@ export function FleurBooking({ shop }: FleurBookingProps) {
               </aside>
             </Reveal>
           </div>
+          ) : null}
         </div>
       </div>
 
-      {selectedDay && selectedTime ? (
+      {canBook && selectedDay && selectedTime ? (
         <ReservationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}

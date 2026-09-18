@@ -3,7 +3,7 @@
 import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { HIGHLIGHT_ICONS } from "@/themes/barber/icons";
 import { getBarberUi } from "@/themes/barber/ui";
 
@@ -27,12 +27,14 @@ export function StudioStory({ shop }: StudioStoryProps) {
             <p className="mt-6 text-base leading-relaxed text-[var(--studio-ink-soft)] sm:text-lg">
               {pickLocale(about.body, locale)}
             </p>
-            <a
-              href="#book"
-              className="studio-btn studio-btn-primary mt-8"
-            >
-              {ui.bookNow}
-            </a>
+            {isShopReservationFeatureEnabled(shop) ? (
+              <a
+                href="#book"
+                className="studio-btn studio-btn-primary mt-8"
+              >
+                {ui.bookNow}
+              </a>
+            ) : null}
           </div>
         </Reveal>
 

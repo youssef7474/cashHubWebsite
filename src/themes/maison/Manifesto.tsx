@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/providers/LocaleProvider";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi, getHeroBadge } from "@/themes/barber/ui";
 
 type MaisonManifestoProps = {
@@ -59,10 +59,12 @@ export function MaisonManifesto({ shop }: MaisonManifestoProps) {
         </p>
 
         <div className="maison-in maison-in-3 mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="#reserve" className="maison-btn maison-btn-primary">
-            {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
-              ui.heroCta}
-          </a>
+          {isShopReservationFeatureEnabled(shop) ? (
+            <a href="#reserve" className="maison-btn maison-btn-primary">
+              {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
+                ui.heroCta}
+            </a>
+          ) : null}
           <a href="#atelier" className="maison-btn maison-btn-ghost">
             {ui.heroSecondary}
           </a>

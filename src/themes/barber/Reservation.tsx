@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils/cn";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
+import { ShopPaymentMethods } from "@/components/shop/ShopPaymentMethods";
 import { hasTimeSlotEnded } from "@/lib/shops/time";
 import { ReservationModal } from "@/components/reservation/ReservationModal";
 import { useBookedSlots } from "@/components/reservation/useBookedSlots";
@@ -27,13 +28,16 @@ type BarberReservationProps = {
 export function BarberReservation({ shop }: BarberReservationProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
+  const canBook = isShopReservationFeatureEnabled(shop);
   const dayOptions = useMemo(
     () => getBookingDayOptions(locale, shop.workingDays),
     [locale, shop.workingDays],
   );
+  // No booking → no availability lookups.
   const bookingDates = useMemo(
-    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
-    [dayOptions],
+    () =>
+      canBook ? dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO) : [],
+    [canBook, dayOptions],
   );
   const [activeCategoryId, setActiveCategoryId] = useState<string>(
     shop.categories[0]?.id ?? "all",
@@ -82,9 +86,9 @@ export function BarberReservation({ shop }: BarberReservationProps) {
       <Container>
         <Reveal>
           <SectionHeader
-            badge={ui.bookBadge}
-            title={ui.bookTitle}
-            subtitle={ui.bookSubtitle}
+            badge={canBook ? ui.bookBadge : ui.servicesBadge}
+            title={canBook ? ui.bookTitle : ui.servicesTitle}
+            subtitle={canBook ? ui.bookSubtitle : ui.servicesSubtitle}
           />
         </Reveal>
 
@@ -102,7 +106,7 @@ export function BarberReservation({ shop }: BarberReservationProps) {
 
               {/* Category tabs */}
               <div
-                className="mb-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="mb-5 flex flex-wrap gap-2"
                 role="tablist"
                 aria-label={ui.pickCategory}
               >
@@ -112,7 +116,7 @@ export function BarberReservation({ shop }: BarberReservationProps) {
                   aria-selected={activeCategoryId === "all"}
                   onClick={() => setActiveCategoryId("all")}
                   className={cn(
-                    "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-full px-4 py-2 text-sm font-medium transition-colors",
                     activeCategoryId === "all"
                       ? "bg-brand-900 text-white"
                       : "bg-brand-100 text-brand-700 hover:bg-brand-200",
@@ -129,7 +133,7 @@ export function BarberReservation({ shop }: BarberReservationProps) {
                       aria-selected={activeCategoryId === category.id}
                       onClick={() => setActiveCategoryId(category.id)}
                       className={cn(
-                        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                        "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                         activeCategoryId === category.id
                           ? "bg-brand-900 text-white"
                           : "bg-brand-100 text-brand-700 hover:bg-brand-200",
@@ -182,9 +186,17 @@ export function BarberReservation({ shop }: BarberReservationProps) {
                   </div>
                 ))}
               </div>
+
+              <ShopPaymentMethods
+                shop={shop}
+                variant="barber"
+                className="mt-6"
+              />
             </div>
           </Reveal>
 
+          {canBook ? (
+          <>
           <Reveal delay={120}>
             <div>
               <h3 className="mb-4 text-sm font-semibold tracking-wide text-brand-700 uppercase">
@@ -293,10 +305,12 @@ export function BarberReservation({ shop }: BarberReservationProps) {
               ) : null}
             </div>
           </Reveal>
+          </>
+          ) : null}
         </div>
       </Container>
 
-      {selectedDay && selectedTime ? (
+      {canBook && selectedDay && selectedTime ? (
         <ReservationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}

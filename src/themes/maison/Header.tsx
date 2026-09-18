@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale } from "@/providers/LocaleProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "@/themes/barber/ui";
 import { cn } from "@/lib/utils/cn";
 
@@ -25,10 +25,11 @@ export function MaisonHeader({ shop }: MaisonHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const name = pickLocale(shop.name, locale);
+  const canBook = isShopReservationFeatureEnabled(shop);
 
   const labels = {
     about: ui.navAbout,
-    book: ui.navBook,
+    book: canBook ? ui.navBook : ui.navServices,
     faq: ui.navFaq,
     contact: ui.navContact,
   };
@@ -74,12 +75,14 @@ export function MaisonHeader({ shop }: MaisonHeaderProps) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher className="rounded-none border-[var(--maison-line)] bg-transparent text-[var(--maison-soft)] hover:border-[var(--maison-champagne)] hover:bg-[var(--maison-champagne)]/10 hover:text-[var(--maison-champagne)]" />
-          <a
-            href="#reserve"
-            className="maison-btn maison-btn-primary hidden !px-5 !py-2.5 sm:inline-flex"
-          >
-            {ui.bookNow}
-          </a>
+          {canBook ? (
+            <a
+              href="#reserve"
+              className="maison-btn maison-btn-primary hidden !px-5 !py-2.5 sm:inline-flex"
+            >
+              {ui.bookNow}
+            </a>
+          ) : null}
 
           <button
             type="button"
@@ -129,13 +132,15 @@ export function MaisonHeader({ shop }: MaisonHeaderProps) {
                 {labels[link.key]}
               </a>
             ))}
-            <a
-              href="#reserve"
-              onClick={() => setOpen(false)}
-              className="maison-btn maison-btn-primary mt-2 w-full sm:hidden"
-            >
-              {ui.bookNow}
-            </a>
+            {canBook ? (
+              <a
+                href="#reserve"
+                onClick={() => setOpen(false)}
+                className="maison-btn maison-btn-primary mt-2 w-full sm:hidden"
+              >
+                {ui.bookNow}
+              </a>
+            ) : null}
           </div>
         </nav>
       ) : null}

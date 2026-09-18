@@ -3,7 +3,7 @@
 import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "@/themes/barber/ui";
 
 type MaisonAtelierProps = {
@@ -24,8 +24,8 @@ export function MaisonAtelier({ shop }: MaisonAtelierProps) {
       className="relative border-y border-[var(--maison-line)] bg-[var(--maison-ink)] py-20 lg:py-28"
     >
       <div className="maison-shell">
-        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
-          <Reveal className="lg:col-span-5">
+        <div className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16">
+          <Reveal className="min-w-0 lg:col-span-5">
             <p className="maison-eyebrow">{ui.aboutBadge}</p>
             <h2 className="maison-display mt-5 text-4xl text-[var(--maison-ivory)] sm:text-5xl lg:text-[3.5rem]">
               {pickLocale(about.title, locale)}
@@ -33,12 +33,14 @@ export function MaisonAtelier({ shop }: MaisonAtelierProps) {
             <p className="mt-7 text-base leading-[1.85] text-[var(--maison-soft)] sm:text-lg">
               {pickLocale(about.body, locale)}
             </p>
-            <a href="#reserve" className="maison-btn maison-btn-ghost mt-10">
-              {ui.bookNow}
-            </a>
+            {isShopReservationFeatureEnabled(shop) ? (
+              <a href="#reserve" className="maison-btn maison-btn-ghost mt-10">
+                {ui.bookNow}
+              </a>
+            ) : null}
           </Reveal>
 
-          <div className="lg:col-span-7 lg:border-s lg:border-[var(--maison-line)] lg:ps-14">
+          <div className="min-w-0 lg:col-span-7 lg:border-s lg:border-[var(--maison-line)] lg:ps-14">
             <ol className="divide-y divide-[var(--maison-line)]">
               {about.highlights.map((item, index) => (
                 <Reveal key={item.id} delay={index * 90}>

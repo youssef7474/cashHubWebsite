@@ -4,7 +4,7 @@ import { useLocale } from "@/providers/LocaleProvider";
 import { Container } from "@/components/ui/Container";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { getBarberUi } from "./ui";
 
@@ -20,7 +20,12 @@ export function BarberFooter({ shop }: BarberFooterProps) {
 
   const links = [
     { href: "#about", label: ui.navAbout },
-    { href: "#reservation", label: ui.navBook },
+    {
+      href: "#reservation",
+      label: isShopReservationFeatureEnabled(shop)
+        ? ui.navBook
+        : ui.navServices,
+    },
     { href: "#faq", label: ui.navFaq },
     { href: "#contact", label: ui.navContact },
   ];

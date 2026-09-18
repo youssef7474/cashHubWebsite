@@ -42,7 +42,7 @@ export function FleurVisit({ shop }: FleurVisitProps) {
           <p className="mt-4 text-[var(--fleur-soft)]">{ui.contactSubtitle}</p>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
           <Reveal delay={60}>
             <div className="fleur-card h-full p-7 sm:p-9">
               <p className="text-[0.65rem] font-semibold tracking-[0.28em] text-[var(--fleur-muted)] uppercase">

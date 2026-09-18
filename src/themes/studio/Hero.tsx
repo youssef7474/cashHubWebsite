@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/providers/LocaleProvider";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi, getHeroBadge } from "@/themes/barber/ui";
 
 type StudioHeroProps = {
@@ -47,10 +47,12 @@ export function StudioHero({ shop }: StudioHeroProps) {
           </p>
 
           <div className="studio-rise studio-rise-4 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="#book" className="studio-btn studio-btn-primary min-w-[10.5rem]">
-              {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
-                ui.heroCta}
-            </a>
+            {isShopReservationFeatureEnabled(shop) ? (
+              <a href="#book" className="studio-btn studio-btn-primary min-w-[10.5rem]">
+                {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
+                  ui.heroCta}
+              </a>
+            ) : null}
             <a href="#story" className="studio-btn studio-btn-ghost min-w-[10.5rem]">
               {ui.heroSecondary}
             </a>

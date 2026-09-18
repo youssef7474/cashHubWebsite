@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/providers/LocaleProvider";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi, getHeroBadge } from "@/themes/barber/ui";
 
 type FleurBloomProps = {
@@ -65,10 +65,12 @@ export function FleurBloom({ shop }: FleurBloomProps) {
         </p>
 
         <div className="fleur-in fleur-in-3 mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="#booking" className="fleur-btn fleur-btn-primary">
-            {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
-              ui.heroCta}
-          </a>
+          {isShopReservationFeatureEnabled(shop) ? (
+            <a href="#booking" className="fleur-btn fleur-btn-primary">
+              {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
+                ui.heroCta}
+            </a>
+          ) : null}
           <a href="#rituals" className="fleur-btn fleur-btn-ghost">
             {ui.heroSecondary}
           </a>

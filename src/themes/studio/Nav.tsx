@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale } from "@/providers/LocaleProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "@/themes/barber/ui";
 import { cn } from "@/lib/utils/cn";
 
@@ -19,9 +19,11 @@ export function StudioNav({ shop }: StudioNavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const canBook = isShopReservationFeatureEnabled(shop);
+
   const links = [
     { href: "#story", label: ui.navAbout },
-    { href: "#book", label: ui.navBook },
+    { href: "#book", label: canBook ? ui.navBook : ui.navServices },
     { href: "#faq", label: ui.navFaq },
     { href: "#find", label: ui.navContact },
   ];
@@ -60,9 +62,11 @@ export function StudioNav({ shop }: StudioNavProps) {
 
         <div className="flex items-center gap-2">
           <LanguageSwitcher className="rounded-full border-[var(--studio-line)] bg-white" />
-          <a href="#book" className="studio-btn studio-btn-primary hidden !py-2 !px-4 sm:inline-flex">
-            {ui.bookNow}
-          </a>
+          {canBook ? (
+            <a href="#book" className="studio-btn studio-btn-primary hidden !py-2 !px-4 sm:inline-flex">
+              {ui.bookNow}
+            </a>
+          ) : null}
           <button
             type="button"
             className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--studio-line)] bg-white md:hidden"
@@ -93,13 +97,15 @@ export function StudioNav({ shop }: StudioNavProps) {
                 {link.label}
               </a>
             ))}
-            <a
-              href="#book"
-              onClick={() => setOpen(false)}
-              className="studio-btn studio-btn-primary mt-2"
-            >
-              {ui.bookNow}
-            </a>
+            {canBook ? (
+              <a
+                href="#book"
+                onClick={() => setOpen(false)}
+                className="studio-btn studio-btn-primary mt-2"
+              >
+                {ui.bookNow}
+              </a>
+            ) : null}
           </div>
         </div>
       ) : null}

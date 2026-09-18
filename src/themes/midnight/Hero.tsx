@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi, getHeroBadge } from "@/themes/barber/ui";
 
 type MidnightHeroProps = {
@@ -48,10 +48,12 @@ export function MidnightHero({ shop }: MidnightHeroProps) {
           </p>
 
           <div className="animate-fade-up animation-delay-400 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button variant="secondary" size="lg" href="#reservation">
-              {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
-                ui.heroCta}
-            </Button>
+            {isShopReservationFeatureEnabled(shop) ? (
+              <Button variant="secondary" size="lg" href="#reservation">
+                {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
+                  ui.heroCta}
+              </Button>
+            ) : null}
             <Button
               variant="outline"
               size="lg"

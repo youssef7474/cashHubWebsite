@@ -9,6 +9,10 @@ export type ShopTemplateId = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type ShopAudience = "men" | "women";
 
+export const SHOP_PAYMENT_METHODS = ["cash", "visa", "instapay", "wallet"] as const;
+
+export type ShopPaymentMethod = (typeof SHOP_PAYMENT_METHODS)[number];
+
 export type ShopLanguageMode = "bilingual" | "en" | "ar";
 
 export type ShopHighlightIcon = "experience" | "sanitized" | "products";
@@ -82,6 +86,8 @@ export type ShopWebsiteData = {
   endOfSubscription?: string | null;
   /** Plan feature flags from the shops.features column. */
   features?: Record<string, boolean> | null;
+  /** Payment methods the shop accepts (shops.payment_methods column). */
+  paymentMethods?: ShopPaymentMethod[];
   templateId: ShopTemplateId;
   languageMode: ShopLanguageMode;
   audience: ShopAudience;
@@ -145,4 +151,12 @@ export function isShopWebsiteFeatureEnabled(
 ): boolean {
   if (!shop.features) return true;
   return shop.features.website === true;
+}
+
+/** Online booking is shown when features is unset (legacy) or reservations is explicitly true. */
+export function isShopReservationFeatureEnabled(
+  shop: Pick<ShopWebsiteData, "features">,
+): boolean {
+  if (!shop.features) return true;
+  return shop.features.reservations === true;
 }

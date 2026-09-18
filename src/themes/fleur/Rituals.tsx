@@ -3,7 +3,7 @@
 import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "@/themes/barber/ui";
 
 type FleurRitualsProps = {
@@ -34,7 +34,7 @@ export function FleurRituals({ shop }: FleurRitualsProps) {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {about.highlights.map((item, index) => (
             <Reveal key={item.id} delay={index * 90}>
               <article className="fleur-card h-full p-7 sm:p-8">
@@ -55,11 +55,13 @@ export function FleurRituals({ shop }: FleurRitualsProps) {
           ))}
         </div>
 
-        <Reveal delay={120} className="mt-12 flex justify-center">
-          <a href="#booking" className="fleur-btn fleur-btn-ghost">
-            {ui.bookNow}
-          </a>
-        </Reveal>
+        {isShopReservationFeatureEnabled(shop) ? (
+          <Reveal delay={120} className="mt-12 flex justify-center">
+            <a href="#booking" className="fleur-btn fleur-btn-ghost">
+              {ui.bookNow}
+            </a>
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );

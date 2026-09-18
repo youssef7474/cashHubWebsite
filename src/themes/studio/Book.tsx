@@ -5,7 +5,8 @@ import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils/cn";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
+import { ShopPaymentMethods } from "@/components/shop/ShopPaymentMethods";
 import { hasTimeSlotEnded } from "@/lib/shops/time";
 import { ReservationModal } from "@/components/reservation/ReservationModal";
 import { useBookedSlots } from "@/components/reservation/useBookedSlots";
@@ -23,13 +24,16 @@ type StudioBookProps = {
 export function StudioBook({ shop }: StudioBookProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
+  const canBook = isShopReservationFeatureEnabled(shop);
   const dayOptions = useMemo(
     () => getBookingDayOptions(locale, shop.workingDays),
     [locale, shop.workingDays],
   );
+  // No booking → no availability lookups.
   const bookingDates = useMemo(
-    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
-    [dayOptions],
+    () =>
+      canBook ? dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO) : [],
+    [canBook, dayOptions],
   );
   const [categoryId, setCategoryId] = useState(shop.categories[0]?.id ?? "");
   const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(() =>
@@ -76,15 +80,20 @@ export function StudioBook({ shop }: StudioBookProps) {
       <div className="studio-shell">
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <p className="studio-eyebrow">{ui.bookBadge}</p>
+            <p className="studio-eyebrow">
+              {canBook ? ui.bookBadge : ui.servicesBadge}
+            </p>
             <h2 className="studio-title mt-4 text-3xl sm:text-4xl lg:text-5xl">
-              {ui.bookTitle}
+              {canBook ? ui.bookTitle : ui.servicesTitle}
             </h2>
-            <p className="mt-4 text-[var(--studio-muted)]">{ui.bookSubtitle}</p>
+            <p className="mt-4 text-[var(--studio-muted)]">
+              {canBook ? ui.bookSubtitle : ui.servicesSubtitle}
+            </p>
           </div>
         </Reveal>
 
         {/* Progress steps */}
+        {canBook ? (
         <Reveal delay={60}>
           <ol className="mx-auto mt-10 flex max-w-md items-center justify-center gap-2">
             {steps.map((step, i) => (
@@ -114,6 +123,7 @@ export function StudioBook({ shop }: StudioBookProps) {
             ))}
           </ol>
         </Reveal>
+        ) : null}
 
         <Reveal delay={100}>
           <div className="mx-auto mt-10 max-w-3xl overflow-hidden rounded-[2rem] border border-[var(--studio-line)] bg-[var(--studio-surface)] shadow-[0_20px_60px_rgb(20_22_26_/_0.06)]">
@@ -121,7 +131,7 @@ export function StudioBook({ shop }: StudioBookProps) {
               <p className="text-xs font-bold tracking-wide text-[var(--studio-ink-soft)] uppercase">
                 {ui.pickService}
               </p>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {shop.categories.map((category) => {
                   const selected = category.id === activeCategory?.id;
                   return (
@@ -130,7 +140,7 @@ export function StudioBook({ shop }: StudioBookProps) {
                       type="button"
                       onClick={() => setCategoryId(category.id)}
                       className={cn(
-                        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                        "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                         selected
                           ? "bg-[var(--studio-deep)] text-white"
                           : "bg-white text-[var(--studio-ink-soft)] hover:bg-[var(--studio-bg-soft)]",
@@ -167,6 +177,14 @@ export function StudioBook({ shop }: StudioBookProps) {
                 })}
               </ul>
 
+              <ShopPaymentMethods
+                shop={shop}
+                variant="studio"
+                className="mt-6"
+              />
+
+              {canBook ? (
+              <>
               <div className="mt-8 grid gap-6 border-t border-[var(--studio-line)] pt-7 sm:grid-cols-2">
                 <div>
                   <p className="text-xs font-bold tracking-wide text-[var(--studio-ink-soft)] uppercase">
@@ -281,12 +299,14 @@ export function StudioBook({ shop }: StudioBookProps) {
                   </p>
                 ) : null}
               </div>
+              </>
+              ) : null}
             </div>
           </div>
         </Reveal>
       </div>
 
-      {selectedDay && selectedTime ? (
+      {canBook && selectedDay && selectedTime ? (
         <ReservationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}

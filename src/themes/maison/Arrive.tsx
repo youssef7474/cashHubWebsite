@@ -44,7 +44,7 @@ export function MaisonArrive({ shop }: MaisonArriveProps) {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-12 lg:grid-cols-2 lg:gap-20">
+        <div className="mt-14 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
           <Reveal delay={60}>
             <div>
               <p className="text-[0.65rem] font-semibold tracking-[0.28em] text-[var(--maison-muted)] uppercase">

@@ -5,7 +5,8 @@ import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils/cn";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
+import { ShopPaymentMethods } from "@/components/shop/ShopPaymentMethods";
 import { hasTimeSlotEnded } from "@/lib/shops/time";
 import { ReservationModal } from "@/components/reservation/ReservationModal";
 import { useBookedSlots } from "@/components/reservation/useBookedSlots";
@@ -28,13 +29,16 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const ko = getKickoffCopy(locale);
+  const canBook = isShopReservationFeatureEnabled(shop);
   const dayOptions = useMemo(
     () => getBookingDayOptions(locale, shop.workingDays),
     [locale, shop.workingDays],
   );
+  // No booking → no availability lookups.
   const bookingDates = useMemo(
-    () => dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO),
-    [dayOptions],
+    () =>
+      canBook ? dayOptions.filter((d) => d.isOpen).map((d) => d.dateISO) : [],
+    [canBook, dayOptions],
   );
   const [categoryId, setCategoryId] = useState(shop.categories[0]?.id ?? "");
   const [dayOffset, setDayOffset] = useState<BookingDayOffset | null>(() =>
@@ -73,19 +77,21 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
       <div className="kickoff-shell relative">
         <Reveal>
           <div>
-            <p className="kickoff-eyebrow">{ui.bookBadge}</p>
+            <p className="kickoff-eyebrow">
+              {canBook ? ui.bookBadge : ui.servicesBadge}
+            </p>
             <h2 className="kickoff-display mt-3 text-5xl text-[var(--ko-white)] sm:text-6xl">
-              {ui.bookTitle}
+              {canBook ? ui.bookTitle : ui.servicesTitle}
             </h2>
             <p className="mt-3 max-w-md text-[var(--ko-muted)]">
-              {ui.bookSubtitle}
+              {canBook ? ui.bookSubtitle : ui.servicesSubtitle}
             </p>
           </div>
         </Reveal>
 
         <Reveal delay={50}>
           <div
-            className="mt-10 flex gap-2 overflow-x-auto pb-1"
+            className="mt-10 flex flex-wrap gap-2"
             role="tablist"
             aria-label={ui.pickCategory}
           >
@@ -99,7 +105,7 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
                   aria-selected={active}
                   onClick={() => setCategoryId(cat.id)}
                   className={cn(
-                    "shrink-0 border px-4 py-2.5 text-[0.68rem] font-bold tracking-[0.14em] uppercase transition-colors",
+                    "border px-4 py-2.5 text-[0.68rem] font-bold tracking-[0.14em] uppercase transition-colors",
                     active
                       ? "border-[var(--ko-pitch)] bg-[var(--ko-pitch)] text-[#04140a]"
                       : "border-[var(--ko-line)] text-[var(--ko-muted)] hover:border-[var(--ko-gold)] hover:text-[var(--ko-gold)]",
@@ -112,15 +118,22 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
           </div>
         </Reveal>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-7">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+          <div
+            className={cn("min-w-0", canBook ? "lg:col-span-7" : "lg:col-span-12")}
+          >
             <div className="mb-4">
               <p className="text-[0.65rem] font-bold tracking-[0.18em] text-[var(--ko-muted)] uppercase">
                 {ui.pickServiceHint}
               </p>
             </div>
 
-            <ul className="grid auto-rows-fr gap-3 sm:grid-cols-2">
+            <ul
+              className={cn(
+                "grid auto-rows-fr gap-3 sm:grid-cols-2",
+                !canBook && "lg:grid-cols-3",
+              )}
+            >
               {(activeCategory?.services ?? []).map((service, index) => {
                 return (
                   <Reveal
@@ -148,10 +161,15 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
                 );
               })}
             </ul>
+
+            <Reveal delay={120}>
+              <ShopPaymentMethods shop={shop} variant="kickoff" className="mt-8" />
+            </Reveal>
           </div>
 
           {/* Scoreboard panel */}
-          <div className="lg:col-span-5">
+          {canBook ? (
+          <div className="min-w-0 lg:col-span-5">
             <Reveal delay={80}>
               <aside className="border-2 border-[var(--ko-gold)]/40 bg-[var(--ko-deep)] lg:sticky lg:top-28">
                 <div className="flex items-center justify-between border-b border-[var(--ko-line)] bg-[var(--ko-gold)] px-4 py-3 text-[var(--ko-night)]">
@@ -256,10 +274,11 @@ export function KickoffLineup({ shop }: KickoffLineupProps) {
               </aside>
             </Reveal>
           </div>
+          ) : null}
         </div>
       </div>
 
-      {selectedDay && selectedTime ? (
+      {canBook && selectedDay && selectedTime ? (
         <ReservationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}

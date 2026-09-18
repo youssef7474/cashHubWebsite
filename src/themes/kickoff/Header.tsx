@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale } from "@/providers/LocaleProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "@/themes/barber/ui";
 import { cn } from "@/lib/utils/cn";
 
@@ -25,10 +25,11 @@ export function KickoffHeader({ shop }: KickoffHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const name = pickLocale(shop.name, locale);
+  const canBook = isShopReservationFeatureEnabled(shop);
 
   const labels = {
     about: ui.navAbout,
-    book: ui.navBook,
+    book: canBook ? ui.navBook : ui.navServices,
     faq: ui.navFaq,
     contact: ui.navContact,
   };
@@ -70,12 +71,14 @@ export function KickoffHeader({ shop }: KickoffHeaderProps) {
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <LanguageSwitcher className="rounded-none border-[var(--ko-line)] bg-transparent text-[var(--ko-soft)] hover:border-[var(--ko-gold)] hover:bg-[var(--ko-gold)]/10 hover:text-[var(--ko-gold)]" />
-          <a
-            href="#lineup"
-            className="kickoff-btn kickoff-btn-primary hidden !px-4 !py-2 sm:inline-flex"
-          >
-            {ui.bookNow}
-          </a>
+          {canBook ? (
+            <a
+              href="#lineup"
+              className="kickoff-btn kickoff-btn-primary hidden !px-4 !py-2 sm:inline-flex"
+            >
+              {ui.bookNow}
+            </a>
+          ) : null}
           <button
             type="button"
             aria-expanded={open}
@@ -124,13 +127,15 @@ export function KickoffHeader({ shop }: KickoffHeaderProps) {
                 {labels[link.key]}
               </a>
             ))}
-            <a
-              href="#lineup"
-              onClick={() => setOpen(false)}
-              className="kickoff-btn kickoff-btn-primary mt-2 w-full"
-            >
-              {ui.bookNow}
-            </a>
+            {canBook ? (
+              <a
+                href="#lineup"
+                onClick={() => setOpen(false)}
+                className="kickoff-btn kickoff-btn-primary mt-2 w-full"
+              >
+                {ui.bookNow}
+              </a>
+            ) : null}
           </div>
         </nav>
       ) : null}

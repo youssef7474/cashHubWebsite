@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/providers/LocaleProvider";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi, getHeroBadge } from "@/themes/barber/ui";
 
 type KickoffHeroProps = {
@@ -45,10 +45,12 @@ export function KickoffHero({ shop }: KickoffHeroProps) {
         </p>
 
         <div className="kickoff-in kickoff-in-3 mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="#lineup" className="kickoff-btn kickoff-btn-pitch">
-            {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
-              ui.heroCta}
-          </a>
+          {isShopReservationFeatureEnabled(shop) ? (
+            <a href="#lineup" className="kickoff-btn kickoff-btn-pitch">
+              {(shop.hero && pickLocale(shop.hero.ctaText, locale)) ||
+                ui.heroCta}
+            </a>
+          ) : null}
           <a href="#squad" className="kickoff-btn kickoff-btn-ghost">
             {ui.heroSecondary}
           </a>

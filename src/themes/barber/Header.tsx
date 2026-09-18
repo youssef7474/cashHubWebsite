@@ -7,7 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { getBarberUi } from "./ui";
 
 type BarberHeaderProps = {
@@ -21,9 +21,14 @@ export function BarberHeader({ shop }: BarberHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const canBook = isShopReservationFeatureEnabled(shop);
+
   const nav = [
     { href: "#about", label: ui.navAbout },
-    { href: "#reservation", label: ui.navBook },
+    {
+      href: "#reservation",
+      label: canBook ? ui.navBook : ui.navServices,
+    },
     { href: "#faq", label: ui.navFaq },
     { href: "#contact", label: ui.navContact },
   ];
@@ -66,9 +71,11 @@ export function BarberHeader({ shop }: BarberHeaderProps) {
 
         <div className="hidden items-center gap-3 lg:flex">
           <LanguageSwitcher />
-          <Button variant="secondary" size="sm" href="#reservation">
-            {ui.bookNow}
-          </Button>
+          {canBook ? (
+            <Button variant="secondary" size="sm" href="#reservation">
+              {ui.bookNow}
+            </Button>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -109,16 +116,18 @@ export function BarberHeader({ shop }: BarberHeaderProps) {
                 {item.label}
               </a>
             ))}
-            <div onClick={() => setMobileOpen(false)}>
-              <Button
-                variant="secondary"
-                size="sm"
-                href="#reservation"
-                className="mt-2 w-full"
-              >
-                {ui.bookNow}
-              </Button>
-            </div>
+            {canBook ? (
+              <div onClick={() => setMobileOpen(false)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  href="#reservation"
+                  className="mt-2 w-full"
+                >
+                  {ui.bookNow}
+                </Button>
+              </div>
+            ) : null}
           </Container>
         </div>
       ) : null}

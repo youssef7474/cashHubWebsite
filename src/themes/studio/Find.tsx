@@ -3,7 +3,7 @@
 import { useLocale } from "@/providers/LocaleProvider";
 import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
-import { pickLocale } from "@/lib/shops/types";
+import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getShopWhatsAppUrl } from "@/lib/whatsapp";
@@ -116,17 +116,21 @@ export function StudioFind({ shop }: StudioFindProps) {
                   ))}
                 </ul>
 
-                <p className="mt-8 text-sm leading-relaxed text-[var(--studio-muted)]">
-                  {locale === "ar"
-                    ? "تقدر تحجز أونلاين في أي وقت، ونأكد معاك الموعد على واتساب."
-                    : "Book online anytime — we’ll confirm your slot on WhatsApp."}
-                </p>
-                <a
-                  href="#book"
-                  className="mt-4 inline-flex text-sm font-semibold text-[var(--studio-accent)] underline-offset-4 hover:underline"
-                >
-                  {ui.bookNow} →
-                </a>
+                {isShopReservationFeatureEnabled(shop) ? (
+                  <>
+                    <p className="mt-8 text-sm leading-relaxed text-[var(--studio-muted)]">
+                      {locale === "ar"
+                        ? "تقدر تحجز أونلاين في أي وقت، ونأكد معاك الموعد على واتساب."
+                        : "Book online anytime — we’ll confirm your slot on WhatsApp."}
+                    </p>
+                    <a
+                      href="#book"
+                      className="mt-4 inline-flex text-sm font-semibold text-[var(--studio-accent)] underline-offset-4 hover:underline"
+                    >
+                      {ui.bookNow} →
+                    </a>
+                  </>
+                ) : null}
               </div>
             </div>
           </div>
