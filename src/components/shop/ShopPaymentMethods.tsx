@@ -99,6 +99,11 @@ const VARIANT_STYLES: Record<
     item: "border-[var(--ko-line)] bg-[var(--ko-panel)] text-[var(--ko-soft)]",
     icon: "text-[var(--ko-gold)]",
   },
+  watan: {
+    title: "text-[var(--wt-muted)]",
+    item: "border-[var(--wt-line)] bg-[var(--wt-panel)] text-[var(--wt-soft)]",
+    icon: "text-[var(--wt-gold)]",
+  },
   fleur: {
     title: "text-[var(--fleur-muted)]",
     item: "rounded-full border-[var(--fleur-line)] bg-[var(--fleur-panel)] text-[var(--fleur-soft)]",

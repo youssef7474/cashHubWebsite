@@ -719,6 +719,69 @@ const FLEUR_SHOPS: ShopWebsiteData[] = [
   },
 ];
 
+/** Egyptian demo prices → Saudi riyal, for the Saudi demo shops. */
+function toSaudiPrices(categories: ShopWebsiteData["categories"]) {
+  return categories.map((category) => ({
+    ...category,
+    services: category.services.map((service) => ({
+      ...service,
+      price: {
+        ar: service.price.ar.replace("ج.م", "ر.س"),
+        en: service.price.en.replace("EGP", "SAR"),
+      },
+    })),
+  }));
+}
+
+/** Saudi demo shops — Watani, Saudi National Day edition (template 7). */
+const WATAN_SHOPS: ShopWebsiteData[] = [
+  {
+    ...DUMMY_SHOPS[0],
+    id: "shop-012",
+    slug: "najd-barber-watan",
+    templateId: 7,
+    name: { ar: "صالون نجد", en: "Najd Barber" },
+    tagline: {
+      ar: "احتفل باليوم الوطني بإطلالة تليق فيك",
+      en: "Celebrate National Day looking your best",
+    },
+    description: {
+      ar: "صالون حلاقة رجالي في الرياض — قصات دقيقة، لحية مرتبة، وتجربة تليق بفرحة الوطن.",
+      en: "A men’s barbershop in Riyadh — sharp cuts, clean beards, and an experience worthy of the nation’s celebration.",
+    },
+    categories: toSaudiPrices(DUMMY_SHOPS[0].categories),
+    contact: {
+      ...DUMMY_SHOPS[0].contact,
+      phone: "0512345678",
+      whatsapp: "966512345678",
+      address: { ar: "حي العليا، الرياض", en: "Al Olaya, Riyadh" },
+    },
+    seo: {
+      ...DUMMY_SHOPS[0].seo,
+      location: { ar: "الرياض", en: "Riyadh" },
+      country: { ar: "السعودية", en: "Saudi Arabia" },
+    },
+  },
+  {
+    ...DUMMY_SHOPS[1],
+    id: "shop-013",
+    slug: "luxe-salon-watan",
+    templateId: 7,
+    categories: toSaudiPrices(DUMMY_SHOPS[1].categories),
+    contact: {
+      ...DUMMY_SHOPS[1].contact,
+      phone: "0598765432",
+      whatsapp: "966598765432",
+      address: { ar: "حي الروضة، جدة", en: "Al Rawdah, Jeddah" },
+    },
+    seo: {
+      ...DUMMY_SHOPS[1].seo,
+      location: { ar: "جدة", en: "Jeddah" },
+      country: { ar: "السعودية", en: "Saudi Arabia" },
+    },
+  },
+];
+
 const ALL_SHOPS: ShopWebsiteData[] = [
   ...DUMMY_SHOPS,
   ...DARK_SHOPS,
@@ -726,6 +789,7 @@ const ALL_SHOPS: ShopWebsiteData[] = [
   ...MAISON_SHOPS,
   ...KICKOFF_SHOPS,
   ...FLEUR_SHOPS,
+  ...WATAN_SHOPS,
 ];
 
 export async function getShopWebsite(
@@ -733,7 +797,7 @@ export async function getShopWebsite(
   shopId: string,
 ): Promise<ShopWebsiteData | null> {
   // Future: const res = await fetch(`/api/shops/${shopSlug}/${shopId}`)
-  // templateId 1–6 share the same ShopWebsiteData shape
+  // templateId 1–7 share the same ShopWebsiteData shape
   const shop = ALL_SHOPS.find((s) => s.slug === shopSlug && s.id === shopId);
   if (!shop) return null;
 
@@ -741,4 +805,9 @@ export async function getShopWebsite(
     ...shop,
     audience: shop.audience === "women" ? "women" : "men",
   };
+}
+
+/** Demo shop by slug alone — used by /demo/[slug] to preview templates. */
+export function getDemoShop(shopSlug: string): ShopWebsiteData | null {
+  return ALL_SHOPS.find((s) => s.slug === shopSlug) ?? null;
 }

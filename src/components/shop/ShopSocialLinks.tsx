@@ -19,6 +19,7 @@ export type ShopSocialVariant =
   | "studio"
   | "maison"
   | "kickoff"
+  | "watan"
   | "fleur";
 
 type ShopSocialLinksProps = {
@@ -57,6 +58,11 @@ const VARIANT_STYLES: Record<
     wrap: "gap-2.5",
     link: "border-[var(--ko-line)] bg-[var(--ko-panel)] text-[var(--ko-soft)] hover:border-[var(--ko-gold)] hover:text-[var(--ko-gold)]",
     label: "text-[var(--ko-muted)]",
+  },
+  watan: {
+    wrap: "gap-2.5",
+    link: "border-[var(--wt-line)] bg-[var(--wt-panel)] text-[var(--wt-soft)] hover:border-[var(--wt-gold)] hover:text-[var(--wt-gold)]",
+    label: "text-[var(--wt-muted)]",
   },
   fleur: {
     wrap: "gap-2.5",

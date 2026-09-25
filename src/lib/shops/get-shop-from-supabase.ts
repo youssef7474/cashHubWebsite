@@ -203,8 +203,23 @@ function optionalString(source: JsonObject, ...keys: string[]) {
   return undefined;
 }
 
+/**
+ * Shop numbers are stored in local form — Egypt "01001234567", Saudi
+ * "0512345678". WhatsApp needs the country code in place of the leading 0.
+ */
+function toWhatsAppDigits(digits: string): string {
+  if (!digits) return digits;
+  if (digits.startsWith("966") || (digits.startsWith("20") && digits.length === 12)) {
+    return digits;
+  }
+  if (digits.startsWith("05") && digits.length === 10) return `966${digits.slice(1)}`;
+  if (digits.startsWith("5") && digits.length === 9) return `966${digits}`;
+  if (digits.startsWith("1") && digits.length === 10) return `20${digits}`;
+  return digits.startsWith("20") ? digits : `2${digits}`;
+}
+
 function templateId(value: number | undefined): ShopTemplateId {
-  return value && value >= 1 && value <= 6
+  return value && value >= 1 && value <= 7
     ? (value as ShopTemplateId)
     : 1;
 }
@@ -495,13 +510,7 @@ async function fetchShopWebsite(
     const whatsappDigits = (
       optionalString(social, "whatsapp", "whats_app") ?? phone
     ).replace(/\D/g, "");
-    // Shop numbers are stored in local Egyptian format (leading 0, no country
-    // code), e.g. "01001234567". WhatsApp needs the country code instead of
-    // the leading 0, so "2" + "01001234567" -> "201001234567".
-    const whatsapp =
-      whatsappDigits && !whatsappDigits.startsWith("20")
-        ? `2${whatsappDigits}`
-        : whatsappDigits;
+    const whatsapp = toWhatsAppDigits(whatsappDigits);
 
     return {
       id: shop.id,

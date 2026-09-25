@@ -5,7 +5,7 @@ export type LocalizedString = {
   en: string;
 };
 
-export type ShopTemplateId = 1 | 2 | 3 | 4 | 5 | 6;
+export type ShopTemplateId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export type ShopAudience = "men" | "women";
 
