@@ -7,6 +7,7 @@ import { MaisonTheme } from "@/themes/maison/MaisonTheme";
 import { KickoffTheme } from "@/themes/kickoff/KickoffTheme";
 import { FleurTheme } from "@/themes/fleur/FleurTheme";
 import { WatanTheme } from "@/themes/watan/WatanTheme";
+import { ParlorTheme } from "@/themes/parlor/ParlorTheme";
 
 export type ShopThemeProps = {
   shop: ShopWebsiteData;
@@ -26,6 +27,8 @@ export function ShopTemplate({ shop }: ShopThemeProps) {
       return <FleurTheme shop={shop} />;
     case 7:
       return <WatanTheme shop={shop} />;
+    case 8:
+      return <ParlorTheme shop={shop} />;
     default:
       return <BarberTheme shop={shop} />;
   }
@@ -40,6 +43,7 @@ export function ShopTemplate({ shop }: ShopThemeProps) {
  * 5 = kickoff — stadium / match-day edition
  * 6 = fleur — elite feminine beauty center
  * 7 = watani — Saudi National Day edition (green, white & gold)
+ * 8 = atiq — vintage barber parlor (cream, navy, barber-pole red, brass)
  */
 const TEMPLATES: Record<ShopTemplateId, ComponentType<ShopThemeProps>> = {
   1: BarberTheme,
@@ -49,6 +53,7 @@ const TEMPLATES: Record<ShopTemplateId, ComponentType<ShopThemeProps>> = {
   5: KickoffTheme,
   6: FleurTheme,
   7: WatanTheme,
+  8: ParlorTheme,
 };
 
 export function getShopTemplate(

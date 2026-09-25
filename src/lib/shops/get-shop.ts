@@ -782,6 +782,22 @@ const WATAN_SHOPS: ShopWebsiteData[] = [
   },
 ];
 
+/** Same shop content, atiq — vintage barber parlor (template 8). */
+const PARLOR_SHOPS: ShopWebsiteData[] = [
+  {
+    ...DUMMY_SHOPS[0],
+    id: "shop-014",
+    slug: "elite-barber-parlor",
+    templateId: 8,
+  },
+  {
+    ...DUMMY_SHOPS[1],
+    id: "shop-015",
+    slug: "luxe-salon-parlor",
+    templateId: 8,
+  },
+];
+
 const ALL_SHOPS: ShopWebsiteData[] = [
   ...DUMMY_SHOPS,
   ...DARK_SHOPS,
@@ -790,6 +806,7 @@ const ALL_SHOPS: ShopWebsiteData[] = [
   ...KICKOFF_SHOPS,
   ...FLEUR_SHOPS,
   ...WATAN_SHOPS,
+  ...PARLOR_SHOPS,
 ];
 
 export async function getShopWebsite(
@@ -797,7 +814,7 @@ export async function getShopWebsite(
   shopId: string,
 ): Promise<ShopWebsiteData | null> {
   // Future: const res = await fetch(`/api/shops/${shopSlug}/${shopId}`)
-  // templateId 1–7 share the same ShopWebsiteData shape
+  // templateId 1–8 share the same ShopWebsiteData shape
   const shop = ALL_SHOPS.find((s) => s.slug === shopSlug && s.id === shopId);
   if (!shop) return null;
 

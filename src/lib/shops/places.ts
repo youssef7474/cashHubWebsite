@@ -94,6 +94,19 @@ const PLACE_NAMES: Record<string, LocalizedString> = {
   qurayyat: { ar: "القريات", en: "Qurayyat" },
 };
 
+/** City codes the platform's Saudi city picker stores (lower-cased). */
+const SAUDI_PLACE_KEYS = new Set([
+  "saudi arabia", "sa", "riyadh", "jeddah", "makkah", "madinah", "dammam",
+  "khobar", "dhahran", "alahsa", "qatif", "jubail", "taif", "tabuk",
+  "buraidah", "unaizah", "khamismushait", "abha", "hail", "najran", "jazan",
+  "yanbu", "alkharj", "hafralbatin", "albaha", "arar", "sakaka", "qurayyat",
+]);
+
+/** Whether a stored place code (e.g. shops.country) is in Saudi Arabia. */
+export function isSaudiPlace(value: string | null | undefined): boolean {
+  return Boolean(value) && SAUDI_PLACE_KEYS.has(normalizeKey(value ?? ""));
+}
+
 function normalizeKey(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }

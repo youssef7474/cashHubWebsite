@@ -104,6 +104,11 @@ const VARIANT_STYLES: Record<
     item: "border-[var(--wt-line)] bg-[var(--wt-panel)] text-[var(--wt-soft)]",
     icon: "text-[var(--wt-gold)]",
   },
+  parlor: {
+    title: "text-[var(--pl-muted)]",
+    item: "rounded-none border-2 border-[var(--pl-line)] bg-[var(--pl-paper)] text-[var(--pl-navy)]",
+    icon: "text-[var(--pl-red)]",
+  },
   fleur: {
     title: "text-[var(--fleur-muted)]",
     item: "rounded-full border-[var(--fleur-line)] bg-[var(--fleur-panel)] text-[var(--fleur-soft)]",

@@ -1,0 +1,245 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Reem+Kufi:wght@500;700&display=swap");
+
+.parlor-theme {
+  /* Vintage barber parlor: cream paper, deep navy, barber-pole red, brass */
+  --pl-paper: #f6eee0;
+  --pl-paper-deep: #efe3cf;
+  --pl-card: #fbf6ec;
+  --pl-navy: #1d2a44;
+  --pl-navy-soft: #34435f;
+  --pl-red: #b8372b;
+  --pl-red-deep: #962a20;
+  --pl-brass: #b0853a;
+  --pl-ink: #1d2a44;
+  --pl-soft: #4a5570;
+  --pl-muted: #7a7f8f;
+  --pl-line: rgb(29 42 68 / 0.18);
+
+  min-height: 100vh;
+  background: var(--pl-paper);
+  color: var(--pl-ink);
+}
+
+.parlor-theme a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Subtle paper grain */
+.parlor-paper {
+  background-color: var(--pl-paper);
+  background-image:
+    radial-gradient(rgb(29 42 68 / 0.035) 1px, transparent 1px),
+    radial-gradient(rgb(176 133 58 / 0.04) 1px, transparent 1px);
+  background-size: 18px 18px, 29px 29px;
+  background-position: 0 0, 9px 11px;
+}
+
+.parlor-display {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+
+[lang="ar"] .parlor-display {
+  font-family: "Reem Kufi", var(--font-tajawal), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.parlor-shell {
+  width: min(1080px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .parlor-shell {
+    width: min(1080px, calc(100% - 3rem));
+  }
+}
+
+.parlor-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--pl-red);
+}
+
+[lang="ar"] .parlor-eyebrow {
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+}
+
+/* ✦ ——— ✦ ornament divider */
+.parlor-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--pl-brass);
+}
+
+.parlor-ornament::before,
+.parlor-ornament::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.parlor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 2px solid var(--pl-navy);
+  transition: background-color 0.2s, color 0.2s, transform 0.15s;
+}
+
+.parlor-btn:active {
+  transform: scale(0.98);
+}
+
+.parlor-btn-primary,
+.parlor-theme a.parlor-btn-primary {
+  background: var(--pl-red);
+  border-color: var(--pl-red);
+  color: #fff;
+  box-shadow: 4px 4px 0 var(--pl-navy);
+}
+
+.parlor-btn-primary:hover,
+.parlor-theme a.parlor-btn-primary:hover {
+  background: var(--pl-red-deep);
+  border-color: var(--pl-red-deep);
+  color: #fff;
+}
+
+.parlor-btn-ghost,
+.parlor-theme a.parlor-btn-ghost {
+  background: transparent;
+  color: var(--pl-navy);
+}
+
+.parlor-btn-ghost:hover,
+.parlor-theme a.parlor-btn-ghost:hover {
+  background: var(--pl-navy);
+  color: var(--pl-paper);
+}
+
+/* Double-rule vintage frame */
+.parlor-frame {
+  border: 2px solid var(--pl-navy);
+  outline: 1px solid var(--pl-navy);
+  outline-offset: 4px;
+}
+
+/* Animated barber-pole stripe */
+.parlor-pole {
+  height: 10px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--pl-red) 0 14px,
+    #fff 14px 28px,
+    var(--pl-navy) 28px 42px,
+    #fff 42px 56px
+  );
+  background-size: 79px 10px;
+  animation: parlor-pole 3s linear infinite;
+}
+
+@keyframes parlor-pole {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 79px 0;
+  }
+}
+
+/* Price list: name ........ price */
+.parlor-leader {
+  flex: 1;
+  min-width: 1.5rem;
+  border-bottom: 2px dotted rgb(29 42 68 / 0.35);
+  transform: translateY(-0.3rem);
+}
+
+/* Ticket with perforated edge */
+.parlor-ticket {
+  position: relative;
+  background: var(--pl-card);
+  border: 2px solid var(--pl-navy);
+}
+
+.parlor-ticket-perf {
+  position: relative;
+  border-top: 2px dashed rgb(29 42 68 / 0.4);
+}
+
+.parlor-ticket-perf::before,
+.parlor-ticket-perf::after {
+  content: "";
+  position: absolute;
+  top: -11px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--pl-paper);
+  border: 2px solid var(--pl-navy);
+}
+
+.parlor-ticket-perf::before {
+  left: -12px;
+  clip-path: inset(0 0 0 50%);
+}
+
+.parlor-ticket-perf::after {
+  right: -12px;
+  clip-path: inset(0 50% 0 0);
+}
+
+@keyframes parlor-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.parlor-in {
+  animation: parlor-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.parlor-in-1 {
+  animation-delay: 100ms;
+}
+
+.parlor-in-2 {
+  animation-delay: 220ms;
+}
+
+.parlor-in-3 {
+  animation-delay: 340ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parlor-in,
+  .parlor-pole {
+    animation: none;
+  }
+}

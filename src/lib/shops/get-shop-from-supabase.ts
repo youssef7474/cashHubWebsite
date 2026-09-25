@@ -22,6 +22,7 @@ import {
   localizeAddressParts,
   localizePlaceName,
   localizePlaceText,
+  isSaudiPlace,
 } from "./places";
 import { normalizeWorkingDays } from "./working-days";
 
@@ -218,8 +219,27 @@ function toWhatsAppDigits(digits: string): string {
   return digits.startsWith("20") ? digits : `2${digits}`;
 }
 
+/** Saudi mobile in any common form: 05XXXXXXXX, 5XXXXXXXX, 9665XXXXXXXX. */
+function isSaudiMobile(phone: string | null): boolean {
+  let digits = (phone ?? "").replace(/D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (digits.startsWith("966")) digits = digits.slice(3);
+  return /^0?5d{8}$/.test(digits);
+}
+
+/**
+ * Currency label for service prices. A shop is Saudi when its phone is a
+ * Saudi mobile or its city is a Saudi city (the platform only offers Saudi
+ * cities to Saudi owners); every other shop is Egyptian.
+ */
+function shopCurrency(shop: Pick<ShopRow, "shop_number" | "country">): LocalizedString {
+  return isSaudiMobile(shop.shop_number) || isSaudiPlace(shop.country)
+    ? { ar: "ر.س", en: "SAR" }
+    : { ar: "ج.م", en: "EGP" };
+}
+
 function templateId(value: number | undefined): ShopTemplateId {
-  return value && value >= 1 && value <= 7
+  return value && value >= 1 && value <= 8
     ? (value as ShopTemplateId)
     : 1;
 }
@@ -413,6 +433,7 @@ function mapFaq(value: unknown): ShopFaq[] {
 function mapCategories(
   categories: CategoryRow[],
   services: ServiceRow[],
+  currency: LocalizedString,
 ): ShopServiceCategory[] {
   return categories.map((category) => ({
     id: String(category.id),
@@ -424,8 +445,8 @@ function mapCategories(
         name: localized(service.name),
         description: localized(service.description ?? ""),
         price: {
-          ar: String(service.price),
-          en: String(service.price),
+          ar: `${service.price} ${currency.ar}`,
+          en: `${service.price} ${currency.en}`,
         },
       })),
   }));
@@ -557,7 +578,7 @@ async function fetchShopWebsite(
         body: localizedFirstField(about, ["body", "description"], address),
         highlights: mapHighlights(config?.advantages, about, shop),
       },
-      categories: mapCategories(categories, services),
+      categories: mapCategories(categories, services, shopCurrency(shop)),
       timeSlots: buildTimeSlots(
         shop.working_hours_from,
         shop.working_hours_to,
