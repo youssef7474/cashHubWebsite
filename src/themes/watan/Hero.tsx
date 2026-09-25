@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLocale } from "@/providers/LocaleProvider";
 import type { ShopWebsiteData } from "@/lib/shops/types";
 import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
@@ -30,10 +31,11 @@ export function WatanHero({ shop }: WatanHeroProps) {
         />
         <div className="watan-pattern absolute inset-0 opacity-60" />
         <div className="watan-glow absolute -top-24 left-1/2 h-64 w-[70%] -translate-x-1/2 rounded-full bg-[var(--wt-gold)]/15 blur-3xl" />
-        {/* National Day date, large and outlined, opposite the headline */}
-        <div className="absolute inset-y-0 end-[6%] hidden flex-col items-center justify-center lg:flex">
-          <span className="watan-date text-[15rem] leading-none">23</span>
-          <span className="mt-2 text-2xl font-extrabold tracking-[0.3em] text-[var(--wt-gold)]/70">
+        {/* National Day date, outlined: fills the empty top on phones/tablets,
+            sits opposite the headline on desktop */}
+        <div className="absolute inset-x-0 top-[5%] flex flex-col items-center sm:top-[8%] lg:inset-x-auto lg:inset-y-0 lg:top-0 lg:end-[6%] lg:justify-center">
+          <span className="watan-date text-[6.5rem] leading-none sm:text-[11rem] lg:text-[15rem]">23</span>
+          <span className="mt-1 text-lg font-extrabold tracking-[0.3em] text-[var(--wt-gold)]/70 sm:mt-2 sm:text-2xl">
             {wt.date}
           </span>
         </div>
@@ -47,12 +49,15 @@ export function WatanHero({ shop }: WatanHeroProps) {
 
       <div className="watan-shell relative z-10">
         <p className="watan-in inline-flex items-center gap-2.5 rounded-full border border-[var(--wt-gold)]/50 bg-[var(--wt-gold)]/10 px-4 py-1.5 text-sm font-bold text-[var(--wt-gold-soft)]">
-          {/* Green-white-green mark — flag colours without the emblem */}
-          <span className="flex h-3 w-5 overflow-hidden rounded-[2px]" aria-hidden>
-            <span className="flex-1 bg-[var(--wt-green)]" />
-            <span className="flex-1 bg-white" />
-            <span className="flex-1 bg-[var(--wt-green)]" />
-          </span>
+          {/* Saudi flag (flag-icons, MIT) — an image, so RTL never mirrors it */}
+          <Image
+            src="/flags/sa.svg"
+            alt={wt.flagAlt}
+            width={24}
+            height={18}
+            unoptimized
+            className="h-[18px] w-6 shrink-0 rounded-[2px] shadow-sm"
+          />
           {wt.hero}
         </p>
 

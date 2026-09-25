@@ -9,6 +9,7 @@ const COPY = {
     pride: "إطلالة تليق بفرحة الوطن",
     hero: "نسخة اليوم الوطني",
     date: "سبتمبر",
+    flagAlt: "علم المملكة العربية السعودية",
   },
   en: {
     day: "Saudi National Day",
@@ -16,6 +17,7 @@ const COPY = {
     pride: "A look worthy of the nation's celebration",
     hero: "National Day edition",
     date: "SEPTEMBER",
+    flagAlt: "Flag of Saudi Arabia",
   },
 } as const;
 
