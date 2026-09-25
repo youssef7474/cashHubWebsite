@@ -40,6 +40,8 @@ type ShopRow = {
   type: string | null;
   location: string | null;
   country: string | null;
+  /** EGP / SAR, kept up to date by the database (see shop_currency migration). */
+  currency?: string | null;
   working_hours_from: string | null;
   working_hours_to: string | null;
   number_of_chairs: number | null;
@@ -232,7 +234,13 @@ function isSaudiMobile(phone: string | null): boolean {
  * Saudi mobile or its city is a Saudi city (the platform only offers Saudi
  * cities to Saudi owners); every other shop is Egyptian.
  */
-function shopCurrency(shop: Pick<ShopRow, "shop_number" | "country">): LocalizedString {
+function shopCurrency(
+  shop: Pick<ShopRow, "shop_number" | "country" | "currency">,
+): LocalizedString {
+  // Saved by the database from the owner phone, shop phone and city.
+  if (shop.currency === "SAR") return { ar: "ر.س", en: "SAR" };
+  if (shop.currency === "EGP") return { ar: "ج.م", en: "EGP" };
+
   return isSaudiMobile(shop.shop_number) || isSaudiPlace(shop.country)
     ? { ar: "ر.س", en: "SAR" }
     : { ar: "ج.م", en: "EGP" };
@@ -486,9 +494,9 @@ async function fetchShopWebsite(
   const [shopResult, categoriesResult, servicesResult] = await Promise.all([
     supabase
       .from("shops")
-      .select(
-        "id, public_number, shop_name, shop_number, subscription_plan, end_of_subscription, features, payment_methods, type, location, country, working_hours_from, working_hours_to, number_of_chairs, working_days, slot_interval_minutes",
-      )
+      // All columns, so shops.currency is picked up once its migration has run
+      // without breaking pages before it has.
+      .select("*")
       .eq("id", shopId)
       .eq("public_number", publicNumber)
       .maybeSingle(),
