@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "CashHub",
   nameAr: "كاش هاب",
-  url: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://cashhub.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://cash-hub-website.vercel.app",
   locale: "ar_SA",
   alternateLocale: "en_US",
   twitterHandle: "@cashhub",
