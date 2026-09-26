@@ -145,6 +145,21 @@ export type Dictionary = {
     badge: string;
     title: string;
     subtitle: string;
+    /** Country + billing-period switches (prices come from lib/pricing). */
+    controls: {
+      countryLabel: string;
+      countries: { EG: string; SA: string };
+      currency: { EG: string; SA: string };
+      periodLabel: string;
+      periods: { monthly: string; quarterly: string; halfYearly: string; yearly: string };
+      /** Shown after the price, e.g. "/ سنوياً". */
+      per: { monthly: string; quarterly: string; halfYearly: string; yearly: string };
+      /** "{price}" and "{currency}" are filled in. */
+      perMonth: string;
+      /** "{percent}" is filled in. */
+      save: string;
+      socialEgyptOnly: string;
+    };
     plans: PricingPlan[];
     addon: PricingAddon;
     social: {

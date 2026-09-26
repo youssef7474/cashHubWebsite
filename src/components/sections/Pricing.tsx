@@ -1,11 +1,124 @@
 "use client";
 
+import { useState, useSyncExternalStore } from "react";
+import Image from "next/image";
 import { useLocale, useTranslation } from "@/providers/LocaleProvider";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
+import {
+  BILLING_PERIODS,
+  PRICING_COUNTRIES,
+  countryFlag,
+  detectPricingCountry,
+  formatPrice,
+  priceFor,
+  type BillingPeriod,
+  type PricedItem,
+  type PricingCountry,
+} from "@/lib/pricing";
+import type { Dictionary } from "@/lib/i18n/types";
+
+type PricingTexts = Dictionary["pricing"];
+
+// The time zone never changes during a visit, so there is nothing to subscribe to.
+const subscribeNever = () => () => {};
+
+function Flag({ country, className }: { country: PricingCountry; className?: string }) {
+  return (
+    <Image
+      src={countryFlag(country)}
+      alt=""
+      width={24}
+      height={18}
+      unoptimized
+      className={cn("h-[18px] w-6 shrink-0 rounded-[3px] shadow-sm ring-1 ring-black/10", className)}
+    />
+  );
+}
+
+/** Two-option pill switch used for country and billing period. */
+function Segmented<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: T; content: React.ReactNode }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div role="radiogroup" aria-label={label} className="inline-flex flex-wrap justify-center gap-1 rounded-2xl border border-brand-200 bg-white p-1 shadow-sm">
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+              active ? "bg-brand-900 text-white shadow" : "text-brand-700 hover:bg-brand-50",
+            )}
+          >
+            {option.content}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Period price: the full price crossed out, what you pay, and the per-month hint. */
+function PeriodPrice({
+  texts,
+  country,
+  period,
+  item,
+  align = "start",
+}: {
+  texts: PricingTexts["controls"];
+  country: PricingCountry;
+  period: BillingPeriod;
+  item: PricedItem;
+  align?: "start" | "end";
+}) {
+  const price = priceFor(country, item, period);
+  const currency = texts.currency[country];
+  const discounted = price.total < price.original;
+
+  return (
+    <div className={cn("flex flex-col gap-1.5", align === "end" ? "items-start sm:items-end" : "items-start")}>
+      {discounted ? (
+        <div className="flex items-center gap-2">
+          <span className="text-base text-muted-foreground line-through decoration-2">
+            {formatPrice(price.original)} {currency}
+          </span>
+          <span className="rounded-full bg-accent-100 px-2.5 py-0.5 text-xs font-bold text-accent-600">
+            {texts.save.replace("{percent}", String(price.discountPercent))}
+          </span>
+        </div>
+      ) : null}
+      <div className="flex items-baseline gap-1">
+        <span className="text-4xl font-extrabold text-brand-900">{formatPrice(price.total)}</span>
+        <span className="text-sm text-muted-foreground">
+          {currency} {texts.per[period]}
+        </span>
+      </div>
+      {price.months > 1 ? (
+        <span className="text-xs text-muted-foreground">
+          {texts.perMonth.replace("{price}", formatPrice(price.perMonth)).replace("{currency}", currency)}
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 function StarBadge({ label }: { label: string }) {
   return (
@@ -37,6 +150,17 @@ export function Pricing() {
   const t = useTranslation();
   const { locale } = useLocale();
   const whatsappUrl = getWhatsAppUrl(locale);
+  const controls = t.pricing.controls;
+  // Saudi visitors start on Saudi prices; the server renders Egypt, and the
+  // browser's time zone takes over on hydration. A flag click overrides it.
+  const detectedCountry = useSyncExternalStore(
+    subscribeNever,
+    detectPricingCountry,
+    () => "EG" as PricingCountry,
+  );
+  const [chosenCountry, setCountry] = useState<PricingCountry | null>(null);
+  const country = chosenCountry ?? detectedCountry;
+  const [period, setPeriod] = useState<BillingPeriod>("monthly");
 
   return (
     <section id="pricing" className="py-[var(--section-py)]">
@@ -47,8 +171,43 @@ export function Pricing() {
           subtitle={t.pricing.subtitle}
         />
 
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <Segmented
+            label={controls.countryLabel}
+            value={country}
+            onChange={setCountry}
+            options={PRICING_COUNTRIES.map((code) => ({
+              value: code,
+              content: (
+                <>
+                  <Flag country={code} />
+                  {controls.countries[code]}
+                </>
+              ),
+            }))}
+          />
+          <Segmented
+            label={controls.periodLabel}
+            value={period}
+            onChange={setPeriod}
+            options={BILLING_PERIODS.map(({ key, discount }) => ({
+              value: key,
+              content: (
+                <>
+                  {controls.periods[key]}
+                  {discount > 0 ? (
+                    <span dir="ltr" className="rounded-full bg-accent-100 px-1.5 text-[11px] font-bold text-accent-600">
+                      −{Math.round(discount * 100)}%
+                    </span>
+                  ) : null}
+                </>
+              ),
+            }))}
+          />
+        </div>
+
         {/* Core plans */}
-        <div className="mx-auto mt-14 grid max-w-3xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
           {t.pricing.plans.map((plan) => (
             <div
               key={plan.name}
@@ -64,11 +223,13 @@ export function Pricing() {
               <h3 className="text-lg font-bold text-brand-900">{plan.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
 
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-brand-900">
-                  {plan.price}
-                </span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
+              <div className="mt-6">
+                <PeriodPrice
+                  texts={controls}
+                  country={country}
+                  period={period}
+                  item={plan.name === "Pro" ? "Pro" : "Starter"}
+                />
               </div>
 
               <ul className="mt-8 flex-1 space-y-3">
@@ -110,14 +271,7 @@ export function Pricing() {
             </div>
 
             <div className="flex shrink-0 flex-col items-start gap-4 sm:items-end">
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-brand-900">
-                  {t.pricing.addon.price}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {t.pricing.addon.period}
-                </span>
-              </div>
+              <PeriodPrice texts={controls} country={country} period={period} item="website" align="end" />
               <Button variant="outline" href={whatsappUrl} className="w-full sm:w-auto">
                 {t.pricing.addon.cta}
               </Button>
@@ -125,12 +279,19 @@ export function Pricing() {
           </div>
         </div>
 
-        {/* Social media packages */}
+        {/* Social media packages and bundles — offered in Egypt only */}
+        {country === "EG" ? (
+        <>
         <div className="mt-20">
           <SectionHeader
             title={t.pricing.social.title}
             subtitle={t.pricing.social.subtitle}
           />
+
+          <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-sm font-semibold text-brand-800 shadow-sm">
+            <Flag country="EG" />
+            {controls.socialEgyptOnly}
+          </p>
 
           <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
             {t.pricing.social.plans.map((plan) => (
@@ -246,6 +407,8 @@ export function Pricing() {
             ))}
           </div>
         </div>
+        </>
+        ) : null}
       </Container>
     </section>
   );

@@ -175,7 +175,18 @@ export const en: Dictionary = {
     badge: "Pricing",
     title: "Choose the plan that fits you",
     subtitle:
-      "Everything you need to run and grow your salon, with no hidden fees. Prices are in Egyptian pounds, billed monthly — cancel anytime.",
+      "Everything you need to run and grow your salon, with no hidden fees. Pick your country and billing period — the longer the period, the more you save. Cancel anytime.",
+    controls: {
+      countryLabel: "Country",
+      countries: { EG: "Egypt", SA: "Saudi Arabia" },
+      currency: { EG: "EGP", SA: "SAR" },
+      periodLabel: "Billing period",
+      periods: { monthly: "Monthly", quarterly: "3 months", halfYearly: "6 months", yearly: "Yearly" },
+      per: { monthly: "/ month", quarterly: "/ 3 months", halfYearly: "/ 6 months", yearly: "/ year" },
+      perMonth: "That's {price} {currency} a month",
+      save: "Save {percent}%",
+      socialEgyptOnly: "Social media packages are available in Egypt only.",
+    },
     plans: [
       {
         name: "Starter",

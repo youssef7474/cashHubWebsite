@@ -175,7 +175,18 @@ export const ar: Dictionary = {
     badge: "الأسعار",
     title: "اختر الخطة المناسبة لك",
     subtitle:
-      "كل ما تحتاجه لإدارة صالونك وتنميته، بدون رسوم خفية. الأسعار بالجنيه المصري، اشتراك شهري تقدر تلغيه في أي وقت.",
+      "كل ما تحتاجه لإدارة صالونك وتنميته، بدون رسوم خفية. اختار بلدك ومدة الاشتراك — وكل ما طالت المدة وفّرت أكتر. تقدر تلغي في أي وقت.",
+    controls: {
+      countryLabel: "البلد",
+      countries: { EG: "مصر", SA: "السعودية" },
+      currency: { EG: "ج.م", SA: "ر.س" },
+      periodLabel: "مدة الاشتراك",
+      periods: { monthly: "شهري", quarterly: "3 شهور", halfYearly: "6 شهور", yearly: "سنوي" },
+      per: { monthly: "/ شهرياً", quarterly: "/ كل 3 شهور", halfYearly: "/ كل 6 شهور", yearly: "/ سنوياً" },
+      perMonth: "يعني {price} {currency} في الشهر",
+      save: "وفّر {percent}%",
+      socialEgyptOnly: "باقات السوشيال ميديا متاحة داخل مصر فقط.",
+    },
     plans: [
       {
         name: "Starter",
