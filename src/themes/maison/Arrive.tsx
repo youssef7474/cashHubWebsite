@@ -6,7 +6,7 @@ import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
-import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
+import { getShopMapLink } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 
 type MaisonArriveProps = {
@@ -20,8 +20,7 @@ export function MaisonArrive({ shop }: MaisonArriveProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const { contact, hours } = shop;
-  const mapUrl = getShopMapUrl(contact);
-  const directionsUrl = getShopDirectionsUrl(contact);
+  const mapLink = getShopMapLink(contact);
 
   return (
     <section
@@ -64,24 +63,14 @@ export function MaisonArrive({ shop }: MaisonArriveProps) {
               />
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                {mapUrl ? (
+                {mapLink ? (
                   <a
-                    href={mapUrl}
+                    href={mapLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="maison-btn maison-btn-ghost"
                   >
-                    {ui.openMap}
-                  </a>
-                ) : null}
-                {directionsUrl ? (
-                  <a
-                    href={directionsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="maison-btn maison-btn-ghost"
-                  >
-                    {ui.directions}
+                    {ui[mapLink.labelKey]}
                   </a>
                 ) : null}
                 <a

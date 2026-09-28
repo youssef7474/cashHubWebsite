@@ -6,7 +6,7 @@ import type { ShopWebsiteData } from "@/lib/shops/types";
 import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
-import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
+import { getShopMapLink } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getShopWhatsAppUrl } from "@/lib/whatsapp";
 
@@ -18,8 +18,7 @@ export function StudioFind({ shop }: StudioFindProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const { contact, hours } = shop;
-  const mapUrl = getShopMapUrl(contact);
-  const directionsUrl = getShopDirectionsUrl(contact);
+  const mapLink = getShopMapLink(contact);
 
   return (
     <section id="find" className="py-20 lg:py-28">
@@ -82,24 +81,14 @@ export function StudioFind({ shop }: StudioFindProps) {
                     >
                       {ui.contactUs}
                     </a>
-                    {mapUrl ? (
+                    {mapLink ? (
                       <a
-                        href={mapUrl}
+                        href={mapLink.href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="studio-btn border border-white/20 bg-white/10 text-white hover:bg-white/15"
                       >
-                        {ui.openMap}
-                      </a>
-                    ) : null}
-                    {directionsUrl ? (
-                      <a
-                        href={directionsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="studio-btn border border-white/20 bg-white/10 text-white hover:bg-white/15"
-                      >
-                        {ui.directions}
+                        {ui[mapLink.labelKey]}
                       </a>
                     ) : null}
                   </div>

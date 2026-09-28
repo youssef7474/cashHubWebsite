@@ -2,18 +2,25 @@ import type { ShopContact, ShopCoordinates } from "./types";
 
 const pair = ({ lat, lng }: ShopCoordinates) => `${lat},${lng}`;
 
-/** Where "Open map" goes: the owner's saved pin, else the link set on the website config. */
-export function getShopMapUrl(contact: ShopContact): string | undefined {
-  if (contact.coordinates) {
-    return `https://www.google.com/maps/search/?api=1&query=${pair(contact.coordinates)}`;
-  }
-  return contact.mapUrl;
-}
+export type ShopMapLink = {
+  href: string;
+  /** Which barber-ui label the button uses. */
+  labelKey: "directions" | "openMap";
+};
 
-/** Google Maps directions from the visitor's location to the shop (opens the Maps app on phones). */
-export function getShopDirectionsUrl(contact: ShopContact): string | undefined {
-  if (!contact.coordinates) return undefined;
-  return `https://www.google.com/maps/dir/?api=1&destination=${pair(contact.coordinates)}`;
+/**
+ * The one location button: directions to the owner's saved pin (opens the
+ * Maps app on phones), else the map link set on the website config.
+ */
+export function getShopMapLink(contact: ShopContact): ShopMapLink | null {
+  if (contact.coordinates) {
+    return {
+      href: `https://www.google.com/maps/dir/?api=1&destination=${pair(contact.coordinates)}`,
+      labelKey: "directions",
+    };
+  }
+  if (contact.mapUrl) return { href: contact.mapUrl, labelKey: "openMap" };
+  return null;
 }
 
 /** Keyless Google Maps embed centred on the pin. */

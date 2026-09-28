@@ -68,7 +68,7 @@ const ui = {
     hoursTitle: "أوقات العمل",
     addressTitle: "العنوان",
     openMap: "فتح الخريطة",
-    directions: "الاتجاهات",
+    directions: "احصل على الاتجاهات",
     mapTitle: "موقع المحل على الخريطة",
     callUs: "اتصل بنا",
     emailUs: "البريد",

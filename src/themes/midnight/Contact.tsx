@@ -9,7 +9,7 @@ import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
-import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
+import { getShopMapLink } from "@/lib/shops/location";
 import { MapPinIcon, PhoneIcon, ClockIcon } from "@/themes/barber/icons";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getShopWhatsAppUrl } from "@/lib/whatsapp";
@@ -22,8 +22,7 @@ export function MidnightContact({ shop }: MidnightContactProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const { contact, hours } = shop;
-  const mapUrl = getShopMapUrl(contact);
-  const directionsUrl = getShopDirectionsUrl(contact);
+  const mapLink = getShopMapLink(contact);
 
   return (
     <section
@@ -62,29 +61,15 @@ export function MidnightContact({ shop }: MidnightContactProps) {
                 title={ui.mapTitle}
                 className="mt-6 rounded-xl border border-brand-800"
               />
-              {mapUrl || directionsUrl ? (
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {mapUrl ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      href={mapUrl}
-                      className="border-brand-700 bg-transparent text-brand-200 hover:border-accent-500/50 hover:bg-brand-900 hover:text-accent-400"
-                    >
-                      {ui.openMap}
-                    </Button>
-                  ) : null}
-                  {directionsUrl ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      href={directionsUrl}
-                      className="border-brand-700 bg-transparent text-brand-200 hover:border-accent-500/50 hover:bg-brand-900 hover:text-accent-400"
-                    >
-                      {ui.directions}
-                    </Button>
-                  ) : null}
-                </div>
+              {mapLink ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  href={mapLink.href}
+                  className="mt-6 border-brand-700 bg-transparent text-brand-200 hover:border-accent-500/50 hover:bg-brand-900 hover:text-accent-400"
+                >
+                  {ui[mapLink.labelKey]}
+                </Button>
               ) : null}
             </div>
           </Reveal>

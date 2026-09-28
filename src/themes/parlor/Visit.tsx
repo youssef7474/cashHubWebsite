@@ -6,7 +6,7 @@ import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
-import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
+import { getShopMapLink } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getParlorCopy } from "./copy";
 
@@ -20,8 +20,7 @@ export function ParlorVisit({ shop }: ParlorVisitProps) {
   const ui = getBarberUi(locale);
   const pl = getParlorCopy(locale);
   const { contact, hours } = shop;
-  const mapUrl = getShopMapUrl(contact);
-  const directionsUrl = getShopDirectionsUrl(contact);
+  const mapLink = getShopMapLink(contact);
 
   return (
     <section id="visit" className="border-t-2 border-[var(--pl-navy)] bg-[var(--pl-paper-deep)] py-20 lg:py-28">
@@ -52,24 +51,14 @@ export function ParlorVisit({ shop }: ParlorVisitProps) {
               />
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                {mapUrl ? (
+                {mapLink ? (
                   <a
-                    href={mapUrl}
+                    href={mapLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="parlor-btn parlor-btn-ghost"
                   >
-                    {ui.openMap}
-                  </a>
-                ) : null}
-                {directionsUrl ? (
-                  <a
-                    href={directionsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="parlor-btn parlor-btn-ghost"
-                  >
-                    {ui.directions}
+                    {ui[mapLink.labelKey]}
                   </a>
                 ) : null}
                 <a href={`tel:${contact.phone}`} className="parlor-btn parlor-btn-primary">

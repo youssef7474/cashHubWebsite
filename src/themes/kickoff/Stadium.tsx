@@ -6,7 +6,7 @@ import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
 import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
-import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
+import { getShopMapLink } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getKickoffCopy } from "./Ticker";
 
@@ -19,8 +19,7 @@ export function KickoffStadium({ shop }: KickoffStadiumProps) {
   const ui = getBarberUi(locale);
   const ko = getKickoffCopy(locale);
   const { contact, hours } = shop;
-  const mapUrl = getShopMapUrl(contact);
-  const directionsUrl = getShopDirectionsUrl(contact);
+  const mapLink = getShopMapLink(contact);
 
   return (
     <section
@@ -63,26 +62,15 @@ export function KickoffStadium({ shop }: KickoffStadiumProps) {
               />
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                {mapUrl ? (
+                {mapLink ? (
                   <a
-                    href={mapUrl}
+                    href={mapLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="kickoff-btn kickoff-btn-ghost"
                     style={{ clipPath: "none" }}
                   >
-                    {ui.openMap}
-                  </a>
-                ) : null}
-                {directionsUrl ? (
-                  <a
-                    href={directionsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="kickoff-btn kickoff-btn-ghost"
-                    style={{ clipPath: "none" }}
-                  >
-                    {ui.directions}
+                    {ui[mapLink.labelKey]}
                   </a>
                 ) : null}
                 <a
