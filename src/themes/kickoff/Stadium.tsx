@@ -5,6 +5,8 @@ import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
+import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
+import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getKickoffCopy } from "./Ticker";
 
@@ -17,6 +19,8 @@ export function KickoffStadium({ shop }: KickoffStadiumProps) {
   const ui = getBarberUi(locale);
   const ko = getKickoffCopy(locale);
   const { contact, hours } = shop;
+  const mapUrl = getShopMapUrl(contact);
+  const directionsUrl = getShopDirectionsUrl(contact);
 
   return (
     <section
@@ -52,17 +56,33 @@ export function KickoffStadium({ shop }: KickoffStadiumProps) {
               <p className="kickoff-display mt-4 text-3xl leading-none text-[var(--ko-white)] sm:text-4xl">
                 {pickLocale(contact.address, locale)}
               </p>
+              <ShopMapEmbed
+                contact={contact}
+                title={ui.mapTitle}
+                className="mt-6 border border-[var(--ko-line)]"
+              />
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                {contact.mapUrl ? (
+                {mapUrl ? (
                   <a
-                    href={contact.mapUrl}
+                    href={mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="kickoff-btn kickoff-btn-ghost"
                     style={{ clipPath: "none" }}
                   >
                     {ui.openMap}
+                  </a>
+                ) : null}
+                {directionsUrl ? (
+                  <a
+                    href={directionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kickoff-btn kickoff-btn-ghost"
+                    style={{ clipPath: "none" }}
+                  >
+                    {ui.directions}
                   </a>
                 ) : null}
                 <a

@@ -5,6 +5,8 @@ import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
 import { isShopReservationFeatureEnabled, pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
+import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
+import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 import { getShopWhatsAppUrl } from "@/lib/whatsapp";
 
@@ -16,6 +18,8 @@ export function StudioFind({ shop }: StudioFindProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const { contact, hours } = shop;
+  const mapUrl = getShopMapUrl(contact);
+  const directionsUrl = getShopDirectionsUrl(contact);
 
   return (
     <section id="find" className="py-20 lg:py-28">
@@ -46,6 +50,11 @@ export function StudioFind({ shop }: StudioFindProps) {
                     <p className="mt-3 text-xl font-semibold leading-snug sm:text-2xl">
                       {pickLocale(contact.address, locale)}
                     </p>
+                    <ShopMapEmbed
+                      contact={contact}
+                      title={ui.mapTitle}
+                      className="mt-6 rounded-2xl border border-white/10"
+                    />
                   </div>
 
                   <div className="mt-8 space-y-3 border-t border-white/10 pt-6">
@@ -73,14 +82,24 @@ export function StudioFind({ shop }: StudioFindProps) {
                     >
                       {ui.contactUs}
                     </a>
-                    {contact.mapUrl ? (
+                    {mapUrl ? (
                       <a
-                        href={contact.mapUrl}
+                        href={mapUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="studio-btn border border-white/20 bg-white/10 text-white hover:bg-white/15"
                       >
                         {ui.openMap}
+                      </a>
+                    ) : null}
+                    {directionsUrl ? (
+                      <a
+                        href={directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="studio-btn border border-white/20 bg-white/10 text-white hover:bg-white/15"
+                      >
+                        {ui.directions}
                       </a>
                     ) : null}
                   </div>

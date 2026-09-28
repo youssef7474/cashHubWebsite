@@ -8,6 +8,8 @@ import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
+import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
+import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
 import { MapPinIcon, PhoneIcon, ClockIcon } from "./icons";
 import { getBarberUi } from "./ui";
 import { getShopWhatsAppUrl } from "@/lib/whatsapp";
@@ -20,6 +22,8 @@ export function BarberContact({ shop }: BarberContactProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const { contact, hours } = shop;
+  const mapUrl = getShopMapUrl(contact);
+  const directionsUrl = getShopDirectionsUrl(contact);
 
   return (
     <section id="contact" className="border-t border-border-subtle py-[var(--section-py)]">
@@ -44,15 +48,32 @@ export function BarberContact({ shop }: BarberContactProps) {
               <p className="text-base leading-relaxed text-muted-foreground">
                 {pickLocale(contact.address, locale)}
               </p>
-              {contact.mapUrl ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  href={contact.mapUrl}
-                  className="mt-6"
-                >
-                  {ui.openMap}
-                </Button>
+              <ShopMapEmbed
+                contact={contact}
+                title={ui.mapTitle}
+                className="mt-6 rounded-xl border border-brand-200"
+              />
+              {mapUrl || directionsUrl ? (
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {mapUrl ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      href={mapUrl}
+                    >
+                      {ui.openMap}
+                    </Button>
+                  ) : null}
+                  {directionsUrl ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      href={directionsUrl}
+                    >
+                      {ui.directions}
+                    </Button>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </Reveal>

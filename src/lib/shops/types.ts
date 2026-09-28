@@ -42,12 +42,19 @@ export type ShopHoursDay = {
   hours: LocalizedString;
 };
 
+export type ShopCoordinates = {
+  lat: number;
+  lng: number;
+};
+
 export type ShopContact = {
   phone: string;
   /** Digits only, for https://wa.me/{whatsapp} */
   whatsapp: string;
   address: LocalizedString;
   mapUrl?: string;
+  /** Pin the owner saved from the platform's profile page (shop_locations). */
+  coordinates?: ShopCoordinates;
   /** Full profile URL, e.g. https://facebook.com/... */
   facebook?: string;
   /** Full profile URL, e.g. https://instagram.com/... */

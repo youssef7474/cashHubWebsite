@@ -5,6 +5,8 @@ import { Reveal } from "@/components/ui/Reveal";
 import type { ShopWebsiteData } from "@/lib/shops/types";
 import { pickLocale } from "@/lib/shops/types";
 import { ShopSocialLinks } from "@/components/shop/ShopSocialLinks";
+import { ShopMapEmbed } from "@/components/shop/ShopMapEmbed";
+import { getShopDirectionsUrl, getShopMapUrl } from "@/lib/shops/location";
 import { getBarberUi } from "@/themes/barber/ui";
 
 type FleurVisitProps = {
@@ -18,6 +20,8 @@ export function FleurVisit({ shop }: FleurVisitProps) {
   const { locale } = useLocale();
   const ui = getBarberUi(locale);
   const { contact, hours } = shop;
+  const mapUrl = getShopMapUrl(contact);
+  const directionsUrl = getShopDirectionsUrl(contact);
 
   return (
     <section
@@ -51,16 +55,31 @@ export function FleurVisit({ shop }: FleurVisitProps) {
               <p className="fleur-display mt-4 text-3xl leading-snug text-[var(--fleur-plum)] sm:text-4xl">
                 {pickLocale(contact.address, locale)}
               </p>
+              <ShopMapEmbed
+                contact={contact}
+                title={ui.mapTitle}
+                className="mt-6 rounded-2xl border border-[var(--fleur-line)]"
+              />
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                {contact.mapUrl ? (
+                {mapUrl ? (
                   <a
-                    href={contact.mapUrl}
+                    href={mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fleur-btn fleur-btn-ghost"
                   >
                     {ui.openMap}
+                  </a>
+                ) : null}
+                {directionsUrl ? (
+                  <a
+                    href={directionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fleur-btn fleur-btn-ghost"
+                  >
+                    {ui.directions}
                   </a>
                 ) : null}
                 <a

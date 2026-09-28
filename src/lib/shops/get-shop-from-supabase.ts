@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type {
   LocalizedString,
+  ShopCoordinates,
   ShopFaq,
   ShopHighlight,
   ShopHighlightIcon,
@@ -460,6 +461,15 @@ function mapCategories(
   }));
 }
 
+function toCoordinates(data: unknown): ShopCoordinates | undefined {
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!isObject(row)) return undefined;
+  const lat = Number(row.latitude);
+  const lng = Number(row.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return undefined;
+  return { lat, lng };
+}
+
 async function fetchShopWebsite(
   shopSlug: string,
   publicNumberParam: string,
@@ -491,7 +501,7 @@ async function fetchShopWebsite(
 
   const shopId = config.shop_id;
 
-  const [shopResult, categoriesResult, servicesResult] = await Promise.all([
+  const [shopResult, categoriesResult, servicesResult, locationResult] = await Promise.all([
     supabase
       .from("shops")
       // All columns, so shops.currency is picked up once its migration has run
@@ -511,6 +521,9 @@ async function fetchShopWebsite(
       .eq("shop_id", shopId)
       .eq("is_active", true)
       .order("id"),
+    // Optional pin from the platform profile page. An error (e.g. the SQL
+    // function not created yet) just means no map, never a broken page.
+    supabase.rpc("get_shop_public_location", { p_shop_id: shopId }),
   ]);
 
   const error = shopResult.error ?? categoriesResult.error ?? servicesResult.error;
@@ -617,6 +630,7 @@ async function fetchShopWebsite(
           return address;
         })(),
         mapUrl: optionalString(social, "mapUrl", "map_url"),
+        coordinates: toCoordinates(locationResult.data),
         facebook: optionalString(social, "facebook"),
         instagram: optionalString(social, "instagram"),
         tiktok: optionalString(social, "tiktok"),
