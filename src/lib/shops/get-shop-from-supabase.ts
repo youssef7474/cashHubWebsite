@@ -56,6 +56,8 @@ type CategoryRow = {
   description: string | null;
   /** Position set from the platform (see category_sort_order migration). */
   sort_order?: number | null;
+  /** Soft-deleted from the platform (see soft_delete migration). */
+  is_deleted?: boolean | null;
 };
 
 /**
@@ -78,6 +80,8 @@ function orderCategories(
 
 type ServiceRow = {
   id: number;
+  /** Soft-deleted from the platform (see soft_delete migration). */
+  is_deleted?: boolean | null;
   category_id: number;
   name: string;
   description: string | null;
@@ -530,17 +534,19 @@ async function fetchShopWebsite(
       .eq("id", shopId)
       .eq("public_number", publicNumber)
       .maybeSingle(),
-    // Disabled categories (and their services) stay off the website. All
-    // columns, so sort_order is picked up once its migration has run.
+    // Disabled or deleted categories (and their services) stay off the
+    // website. All columns, so sort_order / is_deleted are picked up once
+    // their migrations have run.
     supabase
       .from("catigories")
       .select("*")
       .eq("shop_id", shopId)
       .eq("is_active", true)
       .order("id"),
+    // All columns, so is_deleted is picked up once its migration has run.
     supabase
       .from("services")
-      .select("id, category_id, name, description, price")
+      .select("*")
       .eq("shop_id", shopId)
       .eq("is_active", true)
       .order("id"),
@@ -563,10 +569,14 @@ async function fetchShopWebsite(
     const shop = shopResult.data as ShopRow;
     const features = parseFeatures(shop.features);
     const categories = orderCategories(
-      (categoriesResult.data ?? []) as CategoryRow[],
+      ((categoriesResult.data ?? []) as CategoryRow[]).filter(
+        (category) => category.is_deleted !== true,
+      ),
       features,
     );
-    const services = (servicesResult.data ?? []) as ServiceRow[];
+    const services = ((servicesResult.data ?? []) as ServiceRow[]).filter(
+      (service) => service.is_deleted !== true,
+    );
     const hero = isObject(config?.hero) ? config.hero : {};
     const about = isObject(config?.about) ? config.about : {};
     const social = isObject(config?.social) ? config.social : {};
