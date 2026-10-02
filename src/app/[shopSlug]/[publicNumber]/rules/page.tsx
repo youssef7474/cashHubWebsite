@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  RulesUnavailable,
   SubscriptionEnded,
   WebsiteFeatureUnavailable,
 } from "@/components/shop/ShopUnavailable";
 import { getShopWebsite } from "@/lib/shops/get-shop-from-supabase";
 import { getRulesPalette } from "@/lib/shops/rules-palette";
 import {
+  isShopAdvancedHrEnabled,
   isShopSubscriptionExpired,
   isShopWebsiteFeatureEnabled,
   pickLocale,
@@ -55,7 +57,11 @@ export async function generateMetadata({
 
   if (!shop) return { title: "المتجر غير موجود" };
 
-  if (isShopSubscriptionExpired(shop) || !isShopWebsiteFeatureEnabled(shop)) {
+  if (
+    isShopSubscriptionExpired(shop) ||
+    !isShopWebsiteFeatureEnabled(shop) ||
+    !isShopAdvancedHrEnabled(shop)
+  ) {
     return { title: "CashHub", robots: { index: false, follow: false } };
   }
 
@@ -79,6 +85,8 @@ export default async function ShopRulesPage({ params }: RulesPageProps) {
   // Closed exactly like the shop's main page.
   if (isShopSubscriptionExpired(shop)) return <SubscriptionEnded />;
   if (!isShopWebsiteFeatureEnabled(shop)) return <WebsiteFeatureUnavailable />;
+  // Rules are part of Advanced HR, which the admin panel can turn off.
+  if (!isShopAdvancedHrEnabled(shop)) return <RulesUnavailable />;
 
   const locale = shop.languageMode === "en" ? "en" : "ar";
   const copy = COPY[locale];

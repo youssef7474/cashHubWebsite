@@ -162,6 +162,16 @@ export function isShopWebsiteFeatureEnabled(
   return shop.features.website === true;
 }
 
+/**
+ * Advanced HR (attendance + shop rules) is on unless a superadmin turned it
+ * off; the rules page is closed while it is off.
+ */
+export function isShopAdvancedHrEnabled(
+  shop: Pick<ShopWebsiteData, "features">,
+): boolean {
+  return shop.features?.["advanced-hr"] !== false;
+}
+
 /** Online booking is shown when features is unset (legacy) or reservations is explicitly true. */
 export function isShopReservationFeatureEnabled(
   shop: Pick<ShopWebsiteData, "features">,
