@@ -54,7 +54,27 @@ type CategoryRow = {
   id: number;
   title: string;
   description: string | null;
+  /** Position set from the platform (see category_sort_order migration). */
+  sort_order?: number | null;
 };
+
+/**
+ * The shop's own category order when the admin panel enabled
+ * "category-ordering"; otherwise the query's default order is kept.
+ */
+function orderCategories(
+  categories: CategoryRow[],
+  features: Record<string, boolean> | null,
+): CategoryRow[] {
+  if (features?.["category-ordering"] !== true) return categories;
+
+  const position = (category: CategoryRow) =>
+    typeof category.sort_order === "number"
+      ? category.sort_order
+      : Number.MAX_SAFE_INTEGER;
+
+  return [...categories].sort((a, b) => position(a) - position(b));
+}
 
 type ServiceRow = {
   id: number;
@@ -510,10 +530,13 @@ async function fetchShopWebsite(
       .eq("id", shopId)
       .eq("public_number", publicNumber)
       .maybeSingle(),
+    // Disabled categories (and their services) stay off the website. All
+    // columns, so sort_order is picked up once its migration has run.
     supabase
       .from("catigories")
-      .select("id, title, description")
+      .select("*")
       .eq("shop_id", shopId)
+      .eq("is_active", true)
       .order("id"),
     supabase
       .from("services")
@@ -538,7 +561,11 @@ async function fetchShopWebsite(
 
   try {
     const shop = shopResult.data as ShopRow;
-    const categories = (categoriesResult.data ?? []) as CategoryRow[];
+    const features = parseFeatures(shop.features);
+    const categories = orderCategories(
+      (categoriesResult.data ?? []) as CategoryRow[],
+      features,
+    );
     const services = (servicesResult.data ?? []) as ServiceRow[];
     const hero = isObject(config?.hero) ? config.hero : {};
     const about = isObject(config?.about) ? config.about : {};
@@ -559,7 +586,7 @@ async function fetchShopWebsite(
       slug: shopSlug,
       subscriptionPlan: shop.subscription_plan,
       endOfSubscription: shop.end_of_subscription,
-      features: parseFeatures(shop.features),
+      features,
       paymentMethods: parsePaymentMethods(shop.payment_methods),
       templateId: templateId(config?.theme),
       languageMode: languageMode(config?.language_mode),
