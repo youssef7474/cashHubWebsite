@@ -122,6 +122,8 @@ export type ShopWebsiteData = {
   contact: ShopContact;
   faqs: ShopFaq[];
   seo: ShopSeo;
+  /** Rules / terms bullet points (shops.rules), shown on the rules page. */
+  rules?: string[];
 };
 
 export function pickLocale(value: LocalizedString, locale: Locale): string {

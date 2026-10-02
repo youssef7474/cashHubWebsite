@@ -38,6 +38,8 @@ type ShopRow = {
   end_of_subscription: string | null;
   features: unknown;
   payment_methods: unknown;
+  /** Rules / terms bullet points (see the shop_rules migration). */
+  rules?: unknown;
   type: string | null;
   location: string | null;
   country: string | null;
@@ -279,6 +281,15 @@ function templateId(value: number | undefined): ShopTemplateId {
 
 function languageMode(value: string | undefined): ShopLanguageMode {
   return value === "en" || value === "ar" ? value : "bilingual";
+}
+
+/** shops.rules: ordered bullet points, empty strings dropped. */
+function parseRules(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }
 
 function parseFeatures(value: unknown): Record<string, boolean> | null {
@@ -598,6 +609,7 @@ async function fetchShopWebsite(
       endOfSubscription: shop.end_of_subscription,
       features,
       paymentMethods: parsePaymentMethods(shop.payment_methods),
+      rules: parseRules(shop.rules),
       templateId: templateId(config?.theme),
       languageMode: languageMode(config?.language_mode),
       audience: audienceFromType(shop.type),
