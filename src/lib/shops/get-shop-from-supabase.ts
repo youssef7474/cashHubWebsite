@@ -82,6 +82,8 @@ function orderCategories(
 
 type ServiceRow = {
   id: number;
+  /** Position inside its category, set from the platform (see service_sort_order migration). */
+  sort_order?: number | null;
   /** Soft-deleted from the platform (see soft_delete migration). */
   is_deleted?: boolean | null;
   category_id: number;
@@ -89,6 +91,24 @@ type ServiceRow = {
   description: string | null;
   price: number;
 };
+
+/**
+ * The shop's own service order inside each category when the admin panel
+ * enabled "service-ordering"; otherwise the query's default order is kept.
+ */
+function orderServices(
+  services: ServiceRow[],
+  features: Record<string, boolean> | null,
+): ServiceRow[] {
+  if (features?.["service-ordering"] !== true) return services;
+
+  const position = (service: ServiceRow) =>
+    typeof service.sort_order === "number"
+      ? service.sort_order
+      : Number.MAX_SAFE_INTEGER;
+
+  return [...services].sort((a, b) => position(a) - position(b));
+}
 
 type WebsiteConfigRow = {
   shop_id: string;
@@ -554,7 +574,8 @@ async function fetchShopWebsite(
       .eq("shop_id", shopId)
       .eq("is_active", true)
       .order("id"),
-    // All columns, so is_deleted is picked up once its migration has run.
+    // All columns, so is_deleted / sort_order are picked up once their
+    // migrations have run.
     supabase
       .from("services")
       .select("*")
@@ -585,8 +606,11 @@ async function fetchShopWebsite(
       ),
       features,
     );
-    const services = ((servicesResult.data ?? []) as ServiceRow[]).filter(
-      (service) => service.is_deleted !== true,
+    const services = orderServices(
+      ((servicesResult.data ?? []) as ServiceRow[]).filter(
+        (service) => service.is_deleted !== true,
+      ),
+      features,
     );
     const hero = isObject(config?.hero) ? config.hero : {};
     const about = isObject(config?.about) ? config.about : {};
