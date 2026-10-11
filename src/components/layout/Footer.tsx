@@ -3,7 +3,7 @@
 import { useLocale, useTranslation } from "@/providers/LocaleProvider";
 import { Container } from "@/components/ui/Container";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { FacebookIcon, InstagramIcon } from "@/components/shop/social-icons";
+import { FacebookIcon, InstagramIcon, TikTokIcon } from "@/components/shop/social-icons";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { siteConfig } from "@/lib/seo/config";
 
@@ -13,6 +13,7 @@ const legalLinks = ["privacy", "terms"] as const;
 const socialLinks = [
   { href: siteConfig.facebook, label: "Facebook", Icon: FacebookIcon },
   { href: siteConfig.instagram, label: "Instagram", Icon: InstagramIcon },
+  { href: siteConfig.tiktok, label: "TikTok", Icon: TikTokIcon },
 ];
 
 export function Footer() {

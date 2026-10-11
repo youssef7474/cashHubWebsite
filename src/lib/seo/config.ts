@@ -21,7 +21,8 @@ export const siteConfig = {
   whatsapp: "201020233296",
   facebook: "https://www.facebook.com/people/%D9%83%D8%A7%D8%B4-%D9%87%D8%A8-Cash-Hub/61595060050187/",
   instagram: "https://www.instagram.com/cash.hub12/",
-  sameAs: ["https://www.facebook.com/people/%D9%83%D8%A7%D8%B4-%D9%87%D8%A8-Cash-Hub/61595060050187/", "https://www.instagram.com/cash.hub12/"] as string[],
+  tiktok: "https://www.tiktok.com/@cashhub_10",
+  sameAs: ["https://www.facebook.com/people/%D9%83%D8%A7%D8%B4-%D9%87%D8%A8-Cash-Hub/61595060050187/", "https://www.instagram.com/cash.hub12/", "https://www.tiktok.com/@cashhub_10"] as string[],
 } as const;
 
 export function getSiteUrl() {
