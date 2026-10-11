@@ -23,6 +23,9 @@ import type { Dictionary } from "@/lib/i18n/types";
 
 type PricingTexts = Dictionary["pricing"];
 
+// Set to true to show the social media packages and bundles again.
+const SHOW_SOCIAL_AND_BUNDLES = false;
+
 // The time zone never changes during a visit, so there is nothing to subscribe to.
 const subscribeNever = () => () => {};
 
@@ -279,8 +282,8 @@ export function Pricing() {
           </div>
         </div>
 
-        {/* Social media packages and bundles — offered in Egypt only */}
-        {country === "EG" ? (
+        {/* Social media packages and bundles — offered in Egypt only (currently hidden) */}
+        {SHOW_SOCIAL_AND_BUNDLES && country === "EG" ? (
         <>
         <div className="mt-20">
           <SectionHeader

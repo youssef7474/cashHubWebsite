@@ -11,6 +11,9 @@ import { Testimonials } from "@/components/sections/Testimonials";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTA } from "@/components/sections/CTA";
 
+// Set to true to show the testimonials section again.
+const SHOW_TESTIMONIALS = false;
+
 export function LandingPage() {
   return (
     <>
@@ -23,7 +26,7 @@ export function LandingPage() {
         <Demo />
         <Audience />
         <Pricing />
-        <Testimonials />
+        {SHOW_TESTIMONIALS && <Testimonials />}
         <FAQ />
         <CTA />
       </main>
