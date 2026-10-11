@@ -3,7 +3,9 @@
 import { useLocale, useTranslation } from "@/providers/LocaleProvider";
 import { Container } from "@/components/ui/Container";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { FacebookIcon } from "@/components/shop/social-icons";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
+import { siteConfig } from "@/lib/seo/config";
 
 const productLinks = ["features", "pricing", "demo"] as const;
 const companyLinks = ["about", "contact"] as const;
@@ -25,6 +27,15 @@ export function Footer() {
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-brand-400">
               {t.footer.tagline}
             </p>
+            <a
+              href={siteConfig.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="mt-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-800 text-brand-300 transition-colors hover:bg-accent-500 hover:text-white"
+            >
+              <FacebookIcon className="h-5 w-5" />
+            </a>
           </div>
 
           <div>

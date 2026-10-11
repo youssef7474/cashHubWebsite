@@ -19,7 +19,8 @@ export const siteConfig = {
   twitterHandle: "@cashhub",
   contactEmail: "hello@cashhub.app",
   whatsapp: "201020233296",
-  sameAs: [] as string[],
+  facebook: "https://www.facebook.com/people/%D9%83%D8%A7%D8%B4-%D9%87%D8%A8-Cash-Hub/61595060050187/",
+  sameAs: ["https://www.facebook.com/people/%D9%83%D8%A7%D8%B4-%D9%87%D8%A8-Cash-Hub/61595060050187/"] as string[],
 } as const;
 
 export function getSiteUrl() {
