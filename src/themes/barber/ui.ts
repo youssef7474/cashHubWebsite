@@ -59,6 +59,9 @@ const ui = {
     modalError: "تعذر إتمام الحجز، حاول مرة أخرى.",
     modalDuplicateReservation: "لديك حجز بالفعل في هذا اليوم.",
     modalSlotFullyBooked: "هذا الموعد محجوز بالكامل. اختر وقتًا آخر.",
+    modalWorkerLabel: "اختار الفني (اختياري)",
+    modalAnyWorker: "أي فني",
+    modalWorkerUnavailable: "الفني ده مش متاح دلوقتي. اختار فني تاني أو «أي فني».",
     modalClose: "إغلاق",
     modalCancel: "إلغاء",
     slotFullyBooked: "محجوز",
@@ -147,6 +150,10 @@ const ui = {
       "You already have a reservation on this day.",
     modalSlotFullyBooked:
       "This time is fully booked. Please choose another slot.",
+    modalWorkerLabel: "Pick a worker (optional)",
+    modalAnyWorker: "Any worker",
+    modalWorkerUnavailable:
+      "This worker isn't available now. Pick another one or “Any worker”.",
     modalClose: "Close",
     modalCancel: "Cancel",
     slotFullyBooked: "Booked",

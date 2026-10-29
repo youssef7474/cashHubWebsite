@@ -38,6 +38,26 @@ export async function findClientByPhone(
   return { status: "found", clientId: client.id, name: client.name };
 }
 
+export type PublicWorker = { id: string; name: string };
+
+/**
+ * Workers the customer may pick when booking. Empty when the shop hasn't
+ * turned "customer picks the worker" on (or the SQL isn't installed yet).
+ */
+export async function getShopWorkers(shopId: string): Promise<PublicWorker[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_shop_public_workers", {
+    p_shop_id: shopId,
+  });
+  if (error) {
+    console.error("[reservations] workers lookup failed:", error);
+    return [];
+  }
+  return ((data ?? []) as Array<{ id: string; name: string | null }>)
+    .filter((row) => row.id)
+    .map((row) => ({ id: row.id, name: row.name ?? "" }));
+}
+
 export async function getFullyBookedSlots(
   shopId: string,
   date: string,
@@ -111,6 +131,8 @@ export type CreateReservationInput = {
   date: string;
   /** 24-hour HH:MM */
   time: string;
+  /** Worker the customer picked; empty = any worker. */
+  workerId?: string | null;
 };
 
 export type CreateReservationResult =
@@ -123,6 +145,7 @@ export type CreateReservationResult =
         | "invalid_slot"
         | "duplicate_daily_reservation"
         | "slot_fully_booked"
+        | "invalid_worker"
         | "save_failed";
     };
 
@@ -141,14 +164,21 @@ export async function createReservation(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("create_website_reservation", {
+  const args = {
     p_shop_id: input.shopId,
     p_phone: phone,
     p_name: name,
     p_date: input.date,
     p_time: input.time,
     p_client_id: input.clientId ?? null,
-  });
+  };
+  // With a picked worker the booking goes through the worker-aware function.
+  const { error } = input.workerId
+    ? await supabase.rpc("create_website_reservation_with_worker", {
+        ...args,
+        p_worker_id: input.workerId,
+      })
+    : await supabase.rpc("create_website_reservation", args);
 
   if (error) {
     console.error("[reservations] reservation create failed:", error);
@@ -170,6 +200,9 @@ export async function createReservation(
     }
     if (message.includes("slot_fully_booked")) {
       return { ok: false, error: "slot_fully_booked" };
+    }
+    if (message.includes("invalid_worker")) {
+      return { ok: false, error: "invalid_worker" };
     }
     return { ok: false, error: "save_failed" };
   }

@@ -7,6 +7,8 @@ import { getBarberUi } from "@/themes/barber/ui";
 import {
   createReservation,
   findClientByPhone,
+  getShopWorkers,
+  type PublicWorker,
 } from "@/lib/reservations/actions";
 
 type LookupState =
@@ -53,8 +55,12 @@ function ReservationDialog({
   const [lookup, setLookup] = useState<LookupState>({ phase: "idle" });
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<
-    "success" | "error" | "duplicate" | "slot_booked" | null
+    "success" | "error" | "duplicate" | "slot_booked" | "worker" | null
   >(null);
+  // Only filled when the shop lets customers pick a worker.
+  const [workers, setWorkers] = useState<PublicWorker[]>([]);
+  // "" = any worker.
+  const [workerId, setWorkerId] = useState("");
   const [nameError, setNameError] = useState(false);
   const lookupSeq = useRef(0);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -69,6 +75,16 @@ function ReservationDialog({
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
   }, [onClose]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getShopWorkers(shopId).then((list) => {
+      if (!cancelled) setWorkers(list);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [shopId]);
 
   const handlePhoneChange = (value: string) => {
     setPhone(value);
@@ -123,6 +139,7 @@ function ReservationDialog({
       clientId: found ? lookup.clientId : null,
       date: dateISO,
       time: time24,
+      workerId: workerId || null,
     });
     setSubmitting(false);
     if (res.ok) {
@@ -133,6 +150,10 @@ function ReservationDialog({
     } else if (res.error === "slot_fully_booked") {
       setResult("slot_booked");
       onAvailabilityChanged?.();
+    } else if (res.error === "invalid_worker") {
+      setResult("worker");
+      setWorkerId("");
+      getShopWorkers(shopId).then(setWorkers);
     } else {
       setResult("error");
     }
@@ -267,6 +288,35 @@ function ReservationDialog({
           ) : null}
         </div>
 
+        {/* Worker (optional) — only when the shop allows picking one. */}
+        {workers.length > 0 ? (
+          <div className="mt-4">
+            <p className="mb-2 text-sm font-semibold">{ui.modalWorkerLabel}</p>
+            <div className="flex flex-wrap gap-2">
+              {[{ id: "", name: ui.modalAnyWorker }, ...workers].map((worker) => {
+                const selected = workerId === worker.id;
+                return (
+                  <button
+                    key={worker.id || "any"}
+                    type="button"
+                    onClick={() => setWorkerId(worker.id)}
+                    aria-pressed={selected}
+                    disabled={result === "success"}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                      selected
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                    )}
+                  >
+                    {worker.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         {/* Result feedback */}
         {result === "success" ? (
           <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
@@ -283,6 +333,10 @@ function ReservationDialog({
         ) : result === "slot_booked" ? (
           <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
             {ui.modalSlotFullyBooked}
+          </p>
+        ) : result === "worker" ? (
+          <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+            {ui.modalWorkerUnavailable}
           </p>
         ) : null}
 
