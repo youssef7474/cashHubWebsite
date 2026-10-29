@@ -120,7 +120,30 @@ type WebsiteConfigRow = {
   social: unknown;
   faq: unknown;
   seo: unknown;
+  /** What the shop hides from the website (see website_hidden_items migration). */
+  hidden?: unknown;
 };
+
+type WebsiteHidden = {
+  categories: Set<string>;
+  services: Set<string>;
+  paymentMethods: Set<string>;
+};
+
+/** Ids / keys the shop hid from its website; empty = everything shows. */
+function parseHidden(value: unknown): WebsiteHidden {
+  const list = (key: string) =>
+    new Set(
+      isObject(value) && Array.isArray(value[key])
+        ? (value[key] as unknown[]).map((item) => String(item))
+        : [],
+    );
+  return {
+    categories: list("categories"),
+    services: list("services"),
+    paymentMethods: list("paymentMethods"),
+  };
+}
 
 const DAY_NAMES: Record<string, LocalizedString> = {
   saturday: { ar: "السبت", en: "Saturday" },
@@ -540,9 +563,8 @@ async function fetchShopWebsite(
   // same shop is treated as not found.
   const configLookup = await supabase
     .from("shop_website_configs")
-    .select(
-      "shop_id, theme, language_mode, hero, about, advantages, social, faq, seo",
-    )
+    // All columns, so "hidden" is picked up once its migration has run.
+    .select("*")
     .eq("slug", shopSlug)
     .maybeSingle();
 
@@ -600,15 +622,23 @@ async function fetchShopWebsite(
   try {
     const shop = shopResult.data as ShopRow;
     const features = parseFeatures(shop.features);
-    const categories = orderCategories(
-      ((categoriesResult.data ?? []) as CategoryRow[]).filter(
-        (category) => category.is_deleted !== true,
-      ),
-      features,
+    // Hidden from the website by the shop (the cashier still shows them).
+    const hidden = parseHidden(config.hidden);
+    const liveServices = ((servicesResult.data ?? []) as ServiceRow[]).filter(
+      (service) => service.is_deleted !== true,
     );
     const services = orderServices(
-      ((servicesResult.data ?? []) as ServiceRow[]).filter(
-        (service) => service.is_deleted !== true,
+      liveServices.filter((service) => !hidden.services.has(String(service.id))),
+      features,
+    );
+    const categories = orderCategories(
+      ((categoriesResult.data ?? []) as CategoryRow[]).filter(
+        (category) =>
+          category.is_deleted !== true &&
+          !hidden.categories.has(String(category.id)) &&
+          // A category whose services were all hidden would show up empty.
+          (services.some((service) => service.category_id === category.id) ||
+            !liveServices.some((service) => service.category_id === category.id)),
       ),
       features,
     );
@@ -632,7 +662,9 @@ async function fetchShopWebsite(
       subscriptionPlan: shop.subscription_plan,
       endOfSubscription: shop.end_of_subscription,
       features,
-      paymentMethods: parsePaymentMethods(shop.payment_methods),
+      paymentMethods: parsePaymentMethods(shop.payment_methods).filter(
+        (method) => !hidden.paymentMethods.has(method),
+      ),
       rules: parseRules(shop.rules),
       templateId: templateId(config?.theme),
       languageMode: languageMode(config?.language_mode),
