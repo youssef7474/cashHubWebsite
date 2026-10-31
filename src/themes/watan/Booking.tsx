@@ -152,9 +152,11 @@ export function WatanBooking({ shop }: WatanBookingProps) {
                         <span className="flex-1 text-sm leading-relaxed text-[var(--wt-muted)]">
                           {pickLocale(service.description, locale)}
                         </span>
-                        <span className="mt-auto pt-1 font-mono text-sm font-bold text-[var(--wt-gold)]">
-                          {pickLocale(service.price, locale)}
-                        </span>
+                        {pickLocale(service.price, locale) ? (
+                          <span className="mt-auto pt-1 font-mono text-sm font-bold text-[var(--wt-gold)]">
+                            {pickLocale(service.price, locale)}
+                          </span>
+                        ) : null}
                       </article>
                     </li>
                   </Reveal>

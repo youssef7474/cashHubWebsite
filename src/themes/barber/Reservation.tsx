@@ -175,9 +175,11 @@ export function BarberReservation({ shop }: BarberReservationProps) {
                                   {pickLocale(service.description, locale)}
                                 </span>
                               </span>
-                              <span className="shrink-0 text-sm font-bold text-accent-600">
-                                {pickLocale(service.price, locale)}
-                              </span>
+                              {pickLocale(service.price, locale) ? (
+                                <span className="shrink-0 text-sm font-bold text-accent-600">
+                                  {pickLocale(service.price, locale)}
+                                </span>
+                              ) : null}
                             </div>
                           </li>
                         );

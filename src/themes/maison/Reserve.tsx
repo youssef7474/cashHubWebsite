@@ -138,9 +138,11 @@ export function MaisonReserve({ shop }: MaisonReserveProps) {
                             <span className="maison-display text-2xl sm:text-[1.75rem]">
                               {pickLocale(service.name, locale)}
                             </span>
-                            <span className="font-mono text-sm tracking-wide text-[var(--maison-champagne)]">
-                              {pickLocale(service.price, locale)}
-                            </span>
+                            {pickLocale(service.price, locale) ? (
+                              <span className="font-mono text-sm tracking-wide text-[var(--maison-champagne)]">
+                                {pickLocale(service.price, locale)}
+                              </span>
+                            ) : null}
                           </span>
                           <span className="mt-1.5 block text-sm leading-relaxed text-[var(--maison-muted)]">
                             {pickLocale(service.description, locale)}

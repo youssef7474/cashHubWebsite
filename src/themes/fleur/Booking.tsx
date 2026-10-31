@@ -137,9 +137,11 @@ export function FleurBooking({ shop }: FleurBookingProps) {
                             <span className="fleur-display text-xl text-[var(--fleur-plum)] sm:text-2xl">
                               {pickLocale(service.name, locale)}
                             </span>
-                            <span className="text-sm font-semibold tracking-wide text-[var(--fleur-gold)]">
-                              {pickLocale(service.price, locale)}
-                            </span>
+                            {pickLocale(service.price, locale) ? (
+                              <span className="text-sm font-semibold tracking-wide text-[var(--fleur-gold)]">
+                                {pickLocale(service.price, locale)}
+                              </span>
+                            ) : null}
                           </span>
                           <span className="mt-1.5 block text-sm leading-relaxed text-[var(--fleur-muted)]">
                             {pickLocale(service.description, locale)}

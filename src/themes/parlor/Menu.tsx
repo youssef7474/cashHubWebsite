@@ -131,10 +131,14 @@ export function ParlorMenu({ shop }: ParlorMenuProps) {
                         <span className="text-base font-bold text-[var(--pl-navy)] sm:text-lg">
                           {pickLocale(service.name, locale)}
                         </span>
-                        <span className="parlor-leader" aria-hidden />
-                        <span className="parlor-display shrink-0 text-lg text-[var(--pl-red)] sm:text-xl">
-                          {pickLocale(service.price, locale)}
-                        </span>
+                        {pickLocale(service.price, locale) ? (
+                          <>
+                            <span className="parlor-leader" aria-hidden />
+                            <span className="parlor-display shrink-0 text-lg text-[var(--pl-red)] sm:text-xl">
+                              {pickLocale(service.price, locale)}
+                            </span>
+                          </>
+                        ) : null}
                       </div>
                       {pickLocale(service.description, locale) ? (
                         <p className="mt-1 text-sm leading-relaxed text-[var(--pl-muted)]">

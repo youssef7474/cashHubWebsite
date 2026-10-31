@@ -168,9 +168,11 @@ export function StudioBook({ shop }: StudioBookProps) {
                         <span className="min-w-0 flex-1 text-sm font-semibold">
                           {pickLocale(service.name, locale)}
                         </span>
-                        <span className="text-sm font-bold text-[var(--studio-accent)]">
-                          {pickLocale(service.price, locale)}
-                        </span>
+                        {pickLocale(service.price, locale) ? (
+                          <span className="text-sm font-bold text-[var(--studio-accent)]">
+                            {pickLocale(service.price, locale)}
+                          </span>
+                        ) : null}
                       </div>
                     </li>
                   );

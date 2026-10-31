@@ -122,6 +122,10 @@ type WebsiteConfigRow = {
   seo: unknown;
   /** What the shop hides from the website (see website_hidden_items migration). */
   hidden?: unknown;
+  /** Website-only services, no prices (see the platform's website_special_services migration). */
+  special_services?: unknown;
+  /** Show only special_services instead of the shop's real services. */
+  special_services_only?: boolean | null;
 };
 
 type WebsiteHidden = {
@@ -539,6 +543,39 @@ function mapCategories(
   }));
 }
 
+/**
+ * The shop's website-only special services (foreign cashier): headings with
+ * their services, no prices. Services without a name and headings left
+ * empty are skipped.
+ */
+function mapSpecialServices(value: unknown): ShopServiceCategory[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((group, index): ShopServiceCategory[] => {
+    if (!isObject(group)) return [];
+    const services = (Array.isArray(group.services) ? group.services : []).flatMap(
+      (service, serviceIndex) => {
+        if (!isObject(service)) return [];
+        const name = localized(service.name);
+        if (!name.ar && !name.en) return [];
+        return [{
+          id: stringValue(service.id) ?? `special-${index}-${serviceIndex}`,
+          name,
+          description: localized(service.description),
+          // No price for special services; the themes leave the price out.
+          price: { ar: "", en: "" },
+        }];
+      },
+    );
+    if (services.length === 0) return [];
+    return [{
+      id: stringValue(group.id) ?? `special-${index}`,
+      name: localized(group.title),
+      services,
+    }];
+  });
+}
+
 function toCoordinates(data: unknown): ShopCoordinates | undefined {
   const row = Array.isArray(data) ? data[0] : data;
   if (!isObject(row)) return undefined;
@@ -704,7 +741,11 @@ async function fetchShopWebsite(
         body: localizedFirstField(about, ["body", "description"], address),
         highlights: mapHighlights(config?.advantages, about, shop),
       },
-      categories: mapCategories(categories, services, shopCurrency(shop)),
+      // The shop's switch (foreign cashier on): only its special services.
+      categories:
+        features?.["foreign-cashier"] === true && config.special_services_only === true
+          ? mapSpecialServices(config.special_services)
+          : mapCategories(categories, services, shopCurrency(shop)),
       timeSlots: buildTimeSlots(
         shop.working_hours_from,
         shop.working_hours_to,
